@@ -1,0 +1,16 @@
+[package]
+name = "dungeon_ai"
+version = "0.1.0"
+edition = "2021"
+
+# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+
+[dependencies]
+bevy = "0.12.0"
+comfy = "0.2.0"
+ldtk_rust = "0.6.0"
+rand = "0.8.5"
+serde = { version = "1.0.192", features = ["serde_derive"] }
+specs = "0.20.0"
+tracing-subscriber = { version = "0.3.18", features = ["env-filter"] }
+tracing-tracy = { version = "0.10.4", features = ["enable"] }

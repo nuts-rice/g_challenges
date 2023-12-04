@@ -51,30 +51,20 @@ impl Rect {
     }
     pub fn center(&self) -> Pos2 {
         Pos2 {
-            x: (self.top_left.x + self.top_left.x) / 2.,
+            x: (self.top_left.x + self.bottom_right.x) / 2.,
             y: (self.top_left.y + self.bottom_right.y) / 2.,
         }
     }
 }
 
-pub fn apply_room_to_map(_room: &Rect, _map: &mut Dungeon) {
-    unimplemented!()
+pub fn apply_room_to_map(room: &Rect, map: &mut Dungeon) {
+    for y in room.top_left.y as i32..=room.bottom_right.y as i32 {
+        for x in room.top_left.x as i32..=room.bottom_right.x as i32 {
+            let idx = map.xy_idx(x, y);
+            map.tiles[idx] = TileType::Floor;
+        }
+    }
 }
-//     for y in room.bottom_right.y + 1. ..=room.top_left.y {
-//         for x in room.top_left.x + 1. ..=room.bottom_right.x {
-//             let idx = map.xy_idx(x, y);
-//             map.tiles[idx] = TileType::Floor;
-//         }
-//     }
-
-// for y in room.bottom_right.y + 1. ..=room.top_left.y {
-//     for x in room.x + 1..=room.w {
-
-//         let idx = map.xy_idx(x, y);
-//         map.tiles[idx] = TileType::Floor;
-//     }
-// }
-// }
 
 impl Dungeon {
     pub fn new() -> Self {
