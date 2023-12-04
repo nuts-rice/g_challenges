@@ -1,8 +1,15 @@
-
 mod ai;
 mod dungeon;
 pub use dungeon::*;
-fn main() {
-    // let filter = env_logger::filter::Filter::("info, wgpu_core=warn, wgpu_hal=warn, dungeon_ai=debug");
-    // env_logger::filter::Filter::filter("info,wgpu_core=warn,wgpu_hal=warn,dungeon_ai=debug");
+
+pub use comfy::*;
+
+mod game;
+pub use ai::*;
+pub use game::*;
+
+simple_game!("Rougelike AI demo", GameState, setup, game_update);
+
+fn setup(_state: &mut GameState, _ctx: &mut EngineContext) {
+    println!("Hello World!");
 }

@@ -33,9 +33,9 @@ impl MobAI {
                 _ => (),
             }
             if move_dir.x > 0.
-                && move_dir.x < dungeon.width as f32 - 1.
+                && move_dir.x < dungeon.width - 1.
                 && move_dir.y > 0.
-                && move_dir.y < dungeon.height as f32 - 1.
+                && move_dir.y < dungeon.height - 1.
             {
                 let destination = dungeon.xy_idx(move_dir.x as i32, move_dir.y as i32);
 
