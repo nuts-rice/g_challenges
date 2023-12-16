@@ -1,11 +1,11 @@
 use async_trait::async_trait;
+use reqwest::{header, header::HeaderMap, Error};
 use serde::{Deserialize, Serialize};
 use std::{
     any::{Any, TypeId},
     collections::HashMap,
 };
-// type Result<T> = std::result::Result<T, Box<dyn std::error::Error + Send + Sync>>;
-
+type Result<T> = std::result::Result<T, Error>;
 pub struct PageUrl {
     error: String,
     url: String,
@@ -30,13 +30,14 @@ pub struct ApiBuilder<T: Api> {
     user: Option<String>,
     tags: Vec<String>,
     limit: u32,
+    url: String,
     _marker: std::marker::PhantomData<T>,
 }
 
 #[derive(Debug, Deserialize, Serialize, Clone)]
 pub struct Post {
     pub id: u32,
-    pub tags: String,
+    pub tags: Vec<String>,
     pub created_at: String,
     pub creator_id: u32,
     pub image_width: u32,
@@ -46,30 +47,24 @@ pub struct Post {
     pub file_size: u32,
 }
 
+pub type Image = Post;
+pub type Page = ParsedPage;
+pub type Site = PageUrl;
+
 #[async_trait]
 pub trait Api: From<ApiBuilder<Self>> + Any {
+    //TODO: generalize this
     type Image;
     type Page;
     type Site;
+    const URL: &'static str;
+    const SORT: &'static str;
+
     fn builder() -> ApiBuilder<Self> {
         ApiBuilder::new()
     }
-    async fn get_name(&self) -> String;
-    async fn set_credientials(&mut self, key: String, user: String) -> Self;
-    async fn get_page(&self, url: String, headers: HashMap<String, String>) -> PageUrl;
-    async fn parse_page(&self, page: PageUrl) -> ParsedPage;
-    async fn parse_image(
-        &self,
-        site: Self::Site,
-        parentPage: Self::Page,
-        position: u32,
-        tags: Vec<String>,
-    ) -> Option<Self::Image>;
-    async fn get_image(&self, url: String, headers: HashMap<String, String>) -> Self::Image;
-    async fn get_site(&self, url: String, headers: HashMap<String, String>) -> Self::Site;
-    async fn get_image_url(&self, image: Self::Image) -> String;
-    async fn get_image_data(&self, image: Self::Image) -> Vec<u8>;
-    async fn get_image_headers(&self, image: Self::Image) -> HashMap<String, String>;
+    async fn get(&self) -> Result<Vec<Self::Image>>;
+    async fn get_by_id(&self, id: u32) -> Result<Vec<Self::Image>>;
 }
 impl<T: Api + Any> Default for ApiBuilder<T> {
     fn default() -> Self {
@@ -85,29 +80,42 @@ impl<T: Api + Any> ApiBuilder<T> {
             user: None,
             tags: Vec::new(),
             limit: 100,
+            url: T::URL.to_string(),
             _marker: std::marker::PhantomData,
         }
     }
     fn get_name(&self) -> String {
         String::from("")
     }
+
+    pub fn default_url(mut self, url: &str) -> Self {
+        self.url = url.to_string();
+        self
+    }
     pub fn set_credientials(mut self, key: String, user: String) -> Self {
         self.key = Some(key);
         self.user = Some(user);
         self
     }
-    pub fn get_page(&self, _url: String, _headers: HashMap<String, String>) -> PageUrl {
-        PageUrl {
-            error: String::from(""),
-            url: String::from(""),
-            headers: HashMap::new(),
+    async fn get_page(&self, _url: String, _headers: HashMap<String, String>) -> Result<PageUrl> {
+        let result = self.client.get(_url.as_str()).send().await;
+        match result {
+            Ok(result) => {
+                if result.status().is_success() {
+                    Ok(PageUrl {
+                        error: String::new(),
+                        url: _url,
+                        headers: _headers,
+                    })
+                } else {
+                    todo!()
+                }
+            }
+            Err(e) => Err(e),
         }
     }
 
-    async fn get_image<I: Api + Any, S: Api + Any>(
-        &self,
-        page: PageUrl,
-    ) -> Result<Vec<Post>, reqwest::Error> {
+    async fn get_image<I: Api + Any, S: Api + Any>(&self, page: PageUrl) -> Result<Vec<Post>> {
         let url = page.url.as_str();
         let tags = self.tags.join(" ");
         let response = self
@@ -146,6 +154,11 @@ impl<T: Api + Any> ApiBuilder<T> {
 
     pub fn build(self) -> T {
         T::from(self)
+    }
+
+    pub fn set_url(mut self, url: String) -> Self {
+        self.url = url;
+        self
     }
 
     //IMAGES
@@ -191,8 +204,102 @@ impl<T: Api + Any> ApiBuilder<T> {
         HashMap::new()
     }
 }
-//Danbooru
-// pub struct DanbooruClient(ApiBuilder<Self>)
+pub fn get_headers() -> HeaderMap {
+    let mut headers = header::HeaderMap::new();
+    headers.insert(
+        header::USER_AGENT,
+        header::HeaderValue::from_static("PostmanRuntime/7.30.0"),
+    );
+    headers
+}
+pub struct DanbooruClient(ApiBuilder<Self>);
+impl From<ApiBuilder<Self>> for DanbooruClient {
+    fn from(builder: ApiBuilder<Self>) -> Self {
+        Self(builder)
+    }
+}
+#[async_trait]
+impl Api for DanbooruClient {
+    type Image = Image;
+    type Page = Page;
+    type Site = Site;
+    const URL: &'static str = "https://danbooru.donmai.us";
+    const SORT: &'static str = "date:";
+    async fn get(&self) -> Result<Vec<Image>> {
+        let builder = &self.0;
+        let tag_string = builder.tags.join(" ");
+        let url = builder.url.as_str();
+        let response = builder
+            .client
+            .get(format!("{url}/posts.json"))
+            .headers(get_headers())
+            .query(&[
+                ("limit", builder.limit.to_string().as_str()),
+                ("tags", &tag_string),
+            ])
+            .send()
+            .await?
+            .json::<Vec<Image>>()
+            .await?;
+
+        Ok(response)
+    }
+    async fn get_by_id(&self, id: u32) -> Result<Vec<Image>> {
+        unimplemented!()
+    }
+}
+pub struct TestbooruClient(ApiBuilder<Self>);
+impl From<ApiBuilder<Self>> for TestbooruClient {
+    fn from(builder: ApiBuilder<Self>) -> Self {
+        Self(builder)
+    }
+}
+#[async_trait]
+impl Api for TestbooruClient {
+    type Image = Image;
+    type Page = Page;
+    type Site = Site;
+    const URL: &'static str = "https://testbooru.donmai.us";
+    const SORT: &'static str = "date:";
+    async fn get(&self) -> Result<Vec<Image>> {
+        let builder = &self.0;
+        let tag_string = builder.tags.join(" ");
+        let url = builder.url.as_str();
+        let response = builder
+            .client
+            .get(format!("{url}/posts.json"))
+            .headers(get_headers())
+            .query(&[
+                ("limit", builder.limit.to_string().as_str()),
+                ("tags", &tag_string),
+            ])
+            .send()
+            .await?
+            .json::<Vec<Image>>()
+            .await?;
+
+        Ok(response)
+    }
+    async fn get_by_id(&self, id: u32) -> Result<Vec<Image>> {
+        let builder = &self.0;
+        let tag_string = builder.tags.join(" ");
+        let url = builder.url.as_str();
+        let response = builder
+            .client
+            .get(format!("{url}/posts/{id}.json"))
+            .headers(get_headers())
+            .query(&[
+                ("limit", builder.limit.to_string().as_str()),
+                ("tags", &tag_string),
+            ])
+            .send()
+            .await?
+            .json::<Vec<Image>>()
+            .await?;
+
+        Ok(response)
+    }
+}
 
 #[cfg(test)]
 mod test {
@@ -200,6 +307,10 @@ mod test {
 
     #[tokio::test]
     async fn posts_with_tag_test() {
-        unimplemented!()
+        let tags = vec!["muscular_female".to_string(), "dorohedoro".to_string()];
+        let builder = ApiBuilder::<TestbooruClient>::new()
+            .tag(tags[0].clone())
+            .tag(tags[1].clone());
+        let api = builder.build().get_test().await;
     }
 }
