@@ -1,14 +1,22 @@
 pub use crate::api::Api;
 pub use crate::api::{Page, Site};
 use std::collections::HashMap;
+use url::Url;
 use winit::raw_window_handle::HasRawWindowHandle;
 use winit::window::{Window, WindowBuilder, WindowButtons, WindowId};
-use winit::{event::Event, event::WindowEvent, event_loop::EventLoop};
+use winit::{
+    event::ElementState, event::Event, event::MouseButton, event::WindowEvent,
+    event_loop::EventLoop,
+};
+
+//TODO: Profile or import
+pub type Profile = String;
 
 type SourceUrl = String;
 pub struct SourcesWindow {
+    profile: Option<Profile>,
     selected: Vec<Site>,
-    parent: WindowId,
+    parent: Option<WindowId>,
     windows: HashMap<WindowId, Window>,
 }
 type Result<T> = std::result::Result<T, Box<dyn std::error::Error>>;
@@ -21,10 +29,11 @@ pub struct SourcesRow {
 }
 
 impl SourcesWindow {
-    pub fn new() -> Self {
+    pub fn new(profile: Profile, selected: Vec<Site>, parent: WindowId) -> Self {
         Self {
-            selected: Vec::new(),
-            parent: WindowId::from(0),
+            profile: Some(profile),
+            selected,
+            parent: Some(parent),
             windows: HashMap::new(),
         }
     }
@@ -40,12 +49,24 @@ impl SourcesWindow {
                 match event {
                     WindowEvent::CloseRequested => {
                         println!("The close button was pressed; stopping");
+
+                        // let settings =
+                        // let parent = self.parent
                         self.windows.clear();
                         elwt.exit();
                     }
                     WindowEvent::RedrawRequested => {
                         if let Some(window) = self.windows.get(&window_id) {
                             println!("Redrawing window {:?}", window.id());
+                        }
+                    }
+                    WindowEvent::MouseInput {
+                        state: ElementState::Pressed,
+                        button: MouseButton::Left,
+                        ..
+                    } => {
+                        if let Some(window) = self.windows.get(&window_id) {
+                            println!("Mouse input on window {:?}", window.id());
                         }
                     }
                     // WindowEvent::MouseInput => {
