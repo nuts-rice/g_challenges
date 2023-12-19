@@ -22,9 +22,10 @@ type Client<I: Api + Any> = Send<u32, Recv<Gallery<I>, Eps>>;
 // }
 fn main() {
     let sites: Vec<Site> = Vec::new();
-    let mut profile = "default".to_string();                           
-    let mut sources = viewer::SourcesWindow::new(profile, sites, WindowId::from(0));
-    // let sources_window =
-    //     viewer::SourcesWindow::sources_window(&mut sources, sites, &mut WindowId::from(0));
+    let mut profile = "default".to_string();
+    let mut sources =
+        viewer::SourcesWindow::new(profile, sites, egui_winit::winit::window::WindowId::from(0));
+    let sources_window =
+        viewer::SourcesWindow::sources_window(&mut sources, &egui::Context::default());
     println!("Hello, world!");
 }

@@ -1,8 +1,11 @@
 pub use crate::api::Api;
 pub use crate::api::{Page, Site};
+use egui::Context;
+use egui_winit::winit;
+use egui_winit::winit::event_loop::ControlFlow;
+use egui_winit_platform::{Platform, PlatformDescriptor};
 use std::collections::HashMap;
 use url::Url;
-use winit::raw_window_handle::HasRawWindowHandle;
 use winit::window::{Window, WindowBuilder, WindowButtons, WindowId};
 use winit::{
     event::ElementState, event::Event, event::MouseButton, event::WindowEvent,
@@ -16,10 +19,11 @@ type SourceUrl = String;
 pub struct SourcesWindow {
     profile: Option<Profile>,
     selected: Vec<Site>,
-    parent: Option<WindowId>,
+    parent: Option<winit::window::WindowId>,
     windows: HashMap<WindowId, Window>,
 }
 type Result<T> = std::result::Result<T, Box<dyn std::error::Error>>;
+#[derive(Debug, Clone)]
 pub struct SourcesRow {
     site: Site,
     //todo: tie these to ui elements
@@ -37,44 +41,87 @@ impl SourcesWindow {
             windows: HashMap::new(),
         }
     }
-    pub fn sources_window(&mut self, selected: Vec<Site>, parent: &mut WindowId) -> Result<()> {
-        let event_loop = EventLoop::new().unwrap();
+    fn add_check_boxes(&self) {
+        for row in self.selected.iter() {
+            let label = format!("{}", row.url);
+            let source_row = SourcesRow {
+                site: row.clone(),
+                checkbox: true,
+                labels: vec![label],
+                button: WindowButtons::CLOSE,
+            };
+        }
+    }
+    pub fn sources_window(&mut self, ctx: &Context) -> Result<()> {
+        let event_loop = EventLoop::new();
         let mut builder = WindowBuilder::new()
             .with_title("Sources")
             .with_inner_size(winit::dpi::LogicalSize::new(400, 200));
+        let mut platform = Platform::new(PlatformDescriptor {
+            physical_width: 400,
+            physical_height: 200,
+            scale_factor: 1.0,
+            font_definitions: Default::default(),
+            style: Default::default(),
+        });
+
+        let mut selected_state = false;
         let window = builder.build(&event_loop).unwrap();
 
-        event_loop.run(move |event: Event<()>, elwt| {
-            if let Event::WindowEvent { window_id, event } = event {
-                match event {
-                    WindowEvent::CloseRequested => {
-                        println!("The close button was pressed; stopping");
+        event_loop.run(move |event: Event<()>, _, control_flow| {
+            *control_flow = ControlFlow::Wait;
+            platform.handle_event(&event);
+            match event {
+                winit::event::Event::RedrawRequested(_) => {
+                    platform.begin_frame();
 
-                        // let settings =
-                        // let parent = self.parent
-                        self.windows.clear();
-                        elwt.exit();
-                    }
-                    WindowEvent::RedrawRequested => {
-                        if let Some(window) = self.windows.get(&window_id) {
-                            println!("Redrawing window {:?}", window.id());
-                        }
-                    }
-                    WindowEvent::MouseInput {
-                        state: ElementState::Pressed,
-                        button: MouseButton::Left,
-                        ..
-                    } => {
-                        if let Some(window) = self.windows.get(&window_id) {
-                            println!("Mouse input on window {:?}", window.id());
-                        }
-                    }
-                    // WindowEvent::MouseInput => {
-                    //     todo!() }
-                    _ => (),
+                    egui::CentralPanel::default().show(
+                        ctx,
+                        //&platform.context(),
+                        |ui| {
+                            ui.label("source");
+                            ui.checkbox(&mut selected_state, "Source check");
+                        },
+                    );
+                    // let (output, paint_commands) = platform.end_frame(Some(&window));
+                    // let paint_jobs = platform.context().tessellate(paint_commands);
+
+                    window.request_redraw();
                 }
+                winit::event::Event::MainEventsCleared => {
+                    window.request_redraw();
+                }
+                _ => (),
             }
         });
+
+        // if let Event::WindowEvent { window_id, event } = event {
+        //     match event {
+        //         WindowEvent::CloseRequested => {
+        //             println!("The close button was pressed; stopping");
+
+        //             // let settings =
+        //             // let parent = self.parent
+        //             self.windows.clear();
+        //             elwt.exit();
+        //         }
+        //         WindowEvent::RedrawRequested => {
+        //             if let Some(window) = self.windows.get(&window_id) {
+        //                 println!("Redrawing window {:?}", window.id());
+        //             }
+        //         }
+        //         WindowEvent::MouseInput {
+        //             state: ElementState::Pressed,
+        //             button: MouseButton::Left,
+        //             ..
+        //         } => {
+        //             if let Some(window) = self.windows.get(&window_id) {
+        //                 println!("Mouse input on window {:?}", window.id());
+        //             }
+        //         }
+        //         // WindowEvent::MouseInput => {
+        //         //     todo!() }
+        //         _ => (),
 
         todo!()
     }

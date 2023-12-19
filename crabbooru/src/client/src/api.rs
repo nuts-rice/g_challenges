@@ -6,9 +6,10 @@ use std::{
     collections::HashMap,
 };
 type Result<T> = std::result::Result<T, Error>;
+#[derive(Debug, Deserialize, Serialize, Clone)]
 pub struct PageUrl {
     error: String,
-    url: String,
+    pub url: String,
     headers: HashMap<String, String>,
 }
 
@@ -311,6 +312,6 @@ mod test {
         let builder = ApiBuilder::<TestbooruClient>::new()
             .tag(tags[0].clone())
             .tag(tags[1].clone());
-        let api = builder.build().get_test().await;
+        let api = builder.build().get().await;
     }
 }
