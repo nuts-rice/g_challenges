@@ -52,7 +52,7 @@ impl SourcesWindow {
             };
         }
     }
-    pub fn sources_window(&mut self, ctx: &Context) -> Result<()> {
+    pub fn sources_window(&mut self, ) -> Result<()> {
         let event_loop = EventLoop::new();
         let mut builder = WindowBuilder::new()
             .with_title("Sources")
@@ -76,7 +76,7 @@ impl SourcesWindow {
                     platform.begin_frame();
 
                     egui::CentralPanel::default().show(
-                        ctx,
+                        &platform.context(),
                         //&platform.context(),
                         |ui| {
                             ui.label("source");
