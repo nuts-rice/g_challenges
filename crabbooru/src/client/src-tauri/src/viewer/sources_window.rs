@@ -1,16 +1,7 @@
 pub use crate::api::Api;
 pub use crate::api::{Page, Site};
-use egui::Context;
-use egui_winit::winit;
-use egui_winit::winit::event_loop::ControlFlow;
-use egui_winit_platform::{Platform, PlatformDescriptor};
 use std::collections::HashMap;
 use url::Url;
-use winit::window::{Window, WindowBuilder, WindowButtons, WindowId};
-use winit::{
-    event::ElementState, event::Event, event::MouseButton, event::WindowEvent,
-    event_loop::EventLoop,
-};
 
 //TODO: Profile or import
 pub type Profile = String;
@@ -18,82 +9,82 @@ pub type Profile = String;
 type SourceUrl = String;
 pub struct SourcesWindow {
     profile: Option<Profile>,
-    selected: Vec<Site>,
-    parent: Option<winit::window::WindowId>,
-    windows: HashMap<WindowId, Window>,
+    pub selected: Vec<Site>,
+    parent_id: Option<u32>,
+    // windows: HashMap<u32, >,
 }
 type Result<T> = std::result::Result<T, Box<dyn std::error::Error>>;
-#[derive(Debug, Clone)]
-pub struct SourcesRow {
-    site: Site,
-    //todo: tie these to ui elements
-    checkbox: bool,
-    labels: Vec<String>,
-    button: WindowButtons,
-}
+//#[derive(Debug, Clone)]
+//pub struct SourcesRow {
+//    site: Site,
+//    //todo: tie these to ui elements
+//    checkbox: bool,
+//    labels: Vec<String>,
+//    // button: WindowButtons,
+//}
 
 impl SourcesWindow {
-    pub fn new(profile: Profile, selected: Vec<Site>, parent: WindowId) -> Self {
+    pub fn new(profile: Profile, selected: Vec<Site>, parent_id: u32) -> Self {
         Self {
             profile: Some(profile),
             selected,
-            parent: Some(parent),
-            windows: HashMap::new(),
+            parent_id: Some(parent_id),
+            // windows: HashMap::new(),
         }
     }
-    fn add_check_boxes(&self) {
-        for row in self.selected.iter() {
-            let label = format!("{}", row.url);
-            let source_row = SourcesRow {
-                site: row.clone(),
-                checkbox: true,
-                labels: vec![label],
-                button: WindowButtons::CLOSE,
-            };
-        }
-    }
+    // fn add_check_boxes(&self) {
+    //     for row in self.selected.iter() {
+    //         let label = format!("{}", row.url);
+    //         let source_row = SourcesRow {
+    //             site: row.clone(),
+    //             checkbox: true,
+    //             labels: vec![label],
+    //             button: WindowButtons::CLOSE,
+    //         };
+    //     }
+    // }
     pub fn sources_window(&mut self, ) -> Result<()> {
-        let event_loop = EventLoop::new();
-        let mut builder = WindowBuilder::new()
-            .with_title("Sources")
-            .with_inner_size(winit::dpi::LogicalSize::new(400, 200));
-        let mut platform = Platform::new(PlatformDescriptor {
-            physical_width: 400,
-            physical_height: 200,
-            scale_factor: 1.0,
-            font_definitions: Default::default(),
-            style: Default::default(),
-        });
+    //    let event_loop = EventLoop::new();
+    //    let mut builder = WindowBuilder::new()
+    //        .with_title("Sources")
+    //        .with_inner_size(winit::dpi::LogicalSize::new(400, 200));
+    //    let mut platform = Platform::new(PlatformDescriptor {
+    //        physical_width: 400,
+    //        physical_height: 200,
+    //        scale_factor: 1.0,
+    //        font_definitions: Default::default(),
+    //        style: Default::default(),
+    //    });
 
-        let mut selected_state = false;
-        let window = builder.build(&event_loop).unwrap();
+    //    let mut selected_state = false;
+    //    let window = builder.build(&event_loop).unwrap();
 
-        event_loop.run(move |event: Event<()>, _, control_flow| {
-            *control_flow = ControlFlow::Wait;
-            platform.handle_event(&event);
-            match event {
-                winit::event::Event::RedrawRequested(_) => {
-                    platform.begin_frame();
+    //    event_loop.run(move |event: Event<()>, _, control_flow| {
+    //        *control_flow = ControlFlow::Wait;
+    //        platform.handle_event(&event);
+    //        match event {
+    //            winit::event::Event::RedrawRequested(_) => {
+    //                platform.begin_frame();
 
-                    egui::CentralPanel::default().show(
-                        &platform.context(),
-                        //&platform.context(),
-                        |ui| {
-                            ui.label("source");
-                            ui.checkbox(&mut selected_state, "Source check");
-                        },
-                    );
-                    // let (output, paint_commands) = platform.end_frame(Some(&window));
-                    // let paint_jobs = platform.context().tessellate(paint_commands);
+    //                egui::CentralPanel::default().show(
+    //                    &platform.context(),
+    //                    //&platform.context(),
+    //                    |ui| {
+    //                        ui.label("source");
+    //                        ui.checkbox(&mut selected_state, "Source check");
+    //                    },
+    //                );
+    //                // let (output, paint_commands) = platform.end_frame(Some(&window));
+    //                // let paint_jobs = platform.context().tessellate(paint_commands);
 
-                    window.request_redraw();
-                }
-                winit::event::Event::MainEventsCleared => {
-                    window.request_redraw();
-                }
-                _ => (),
-            }
-        });
+    //                window.request_redraw();
+    //            }
+    //            winit::event::Event::MainEventsCleared => {
+    //                window.request_redraw();
+    //            }
+    //            _ => (),
+    //        }
+    //    });
 
         // if let Event::WindowEvent { window_id, event } = event {
         //     match event {
@@ -123,7 +114,7 @@ impl SourcesWindow {
         //         //     todo!() }
         //         _ => (),
 
-        todo!()
+        todo!();
     }
     pub fn add_source(&mut self, url: SourceUrl) {
         todo!()

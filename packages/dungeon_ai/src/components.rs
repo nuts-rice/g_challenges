@@ -1,6 +1,5 @@
 use crate::*;
 
-
 #[derive(Clone, Eq, Debug, PartialEq, Hash)]
 pub enum Movement {
     Static,

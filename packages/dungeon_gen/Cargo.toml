@@ -1,0 +1,18 @@
+[package]
+name = "dungeon_gen"
+version = "0.1.0"
+edition = "2021"
+
+# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+
+[dependencies]
+comfy = { version = "0.2.0", features = ["tracy"] }
+comfy-core = "0.2.0"
+comfy-wgpu = "0.2.0"
+grids = "0.2.3"
+image = "0.24.7"
+rand = "0.8.5"
+rand_chacha = "0.3.1"
+serde = { version = "1.0.192", features = ["serde_derive"] }
+wfc = "0.10.7"
+wfc_image = "0.12.1"

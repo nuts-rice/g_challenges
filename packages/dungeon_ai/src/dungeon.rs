@@ -2,8 +2,8 @@ use crate::*;
 use comfy::epaint::Pos2;
 use ldtk_rust::Project;
 
-pub const DUNGEONWIDTH: f32 = 80.;
-pub const DUNGEONHEIGHT: f32 = 43.;
+pub const DUNGEONWIDTH: f32 = 40.;
+pub const DUNGEONHEIGHT: f32 = 21.;
 pub const DUNGEONSIZE: f32 = DUNGEONWIDTH * DUNGEONHEIGHT;
 #[derive(Clone, Copy, Debug, PartialEq)]
 pub enum TileType {
@@ -66,6 +66,24 @@ pub fn apply_room_to_map(room: &Rect, map: &mut Dungeon) {
     }
 }
 
+pub fn spawn_room(map: &mut Dungeon, room: &Rect, _spawn_list: &mut Vec<(usize, String)>) {
+    let mut canidates: Vec<usize> = Vec::new();
+    {
+        for y in room.top_left.y as i32..=room.bottom_right.y as i32 {
+            for x in room.top_left.x as i32..=room.bottom_right.x as i32 {
+                let idx = map.xy_idx(x, y);
+                if map.tiles[idx] == TileType::Floor {
+                    canidates.push(idx);
+                }
+            }
+        }
+    }
+    spawn_region();
+}
+
+pub fn spawn_region() {
+    unimplemented!()
+}
 impl Dungeon {
     pub fn new() -> Self {
         Dungeon {
@@ -104,7 +122,7 @@ impl Dungeon {
         let first_room = self.rects[0];
         self.add_subrects(first_room);
         let mut n_rooms = 0;
-        while n_rooms < 240 {
+        while n_rooms < 40 {
             let rect = self.get_random_rect();
             let canidate = self.get_random_sub_rect(rect);
             info!(
@@ -141,15 +159,66 @@ impl Dungeon {
         }
     }
     fn is_bsp_possible(&self, _canidate: Rect) -> bool {
-        unimplemented!()
+        let mut expanded = _canidate;
+        expanded.top_left.x -= 2.;
+        expanded.top_left.y -= 2.;
+        expanded.bottom_right.x += 2.;
+        expanded.bottom_right.y += 2.;
+        let mut can_build = true;
+        for y in expanded.top_left.y as i32..=expanded.bottom_right.y as i32 {
+            for x in expanded.top_left.x as i32..=expanded.bottom_right.x as i32 {
+                if x > (self.width - 2.) as i32 {
+                    can_build = false;
+                }
+                if y > (self.height - 2.) as i32 {
+                    can_build = false;
+                }
+                if x < 1 {
+                    can_build = false;
+                }
+                if y < 1 {
+                    can_build = false;
+                }
+                if can_build {
+                    let idx = self.xy_idx(x, y);
+                    if self.tiles[idx] != TileType::Wall {
+                        can_build = false;
+                    }
+                }
+            }
+        }
+        can_build
     }
 
     fn draw_corridor(&mut self, _x1: f32, _y1: f32, _x2: f32, _y2: f32) {
-        unimplemented!()
+        let mut x = _x1;
+        let mut y = _y1;
+        while x != _x2 || y != _y2 {
+            if x < _x2 {
+                x += 1.;
+            } else if x > _x2 {
+                x -= 1.;
+            } else if y < _y2 {
+                y += 1.;
+            } else if y > _y2 {
+                y -= 1.;
+            }
+            let idx = self.xy_idx(x as i32, y as i32);
+            self.tiles[idx] = TileType::Floor;
+        }
     }
 
     fn get_random_sub_rect(&self, _canidate: Rect) -> Rect {
-        unimplemented!()
+        let mut result = _canidate;
+        let rect_width = i32::abs(_canidate.top_left.x as i32 - _canidate.bottom_right.x as i32);
+        let rect_height = i32::abs(_canidate.top_left.y as i32 - _canidate.bottom_right.y as i32);
+        let w = i32::max(2, random_i32(1, i32::min(rect_width, 10)) - 1) + 1;
+        let h = i32::max(2, random_i32(1, i32::min(rect_height, 10)) - 1) + 1;
+        result.top_left.x += random_range(1., 6.) - 1.;
+        result.top_left.y += random_range(1., 6.) - 1.;
+        result.bottom_right.x = result.top_left.x + w as f32;
+        result.bottom_right.y = result.top_left.y + h as f32;
+        result
     }
     fn get_random_rect(&self) -> Rect {
         if self.rects.len() == 1 {
@@ -159,7 +228,47 @@ impl Dungeon {
         self.rects[idx]
     }
     fn add_subrects(&mut self, _rect: Rect) {
-        unimplemented!()
+        let width = i32::abs(_rect.top_left.x as i32 - _rect.bottom_right.x as i32);
+        let height = i32::abs(_rect.top_left.y as i32 - _rect.bottom_right.y as i32);
+        let half_width = i32::max(width / 2, 1);
+        let half_height = i32::max(height / 2, 1);
+        self.rects.push(Rect::new(
+            _rect.top_left,
+            Pos2 {
+                x: half_width as f32,
+                y: half_height as f32,
+            },
+        ));
+        self.rects.push(Rect::new(
+            Pos2 {
+                x: _rect.top_left.x,
+                y: _rect.top_left.y + half_height as f32,
+            },
+            Pos2 {
+                x: half_width as f32,
+                y: half_height as f32,
+            },
+        ));
+        self.rects.push(Rect::new(
+            Pos2 {
+                x: _rect.top_left.x + half_width as f32,
+                y: _rect.top_left.y,
+            },
+            Pos2 {
+                x: half_width as f32,
+                y: half_height as f32,
+            },
+        ));
+        self.rects.push(Rect::new(
+            Pos2 {
+                x: _rect.top_left.x + half_width as f32,
+                y: _rect.top_left.y + half_height as f32,
+            },
+            Pos2 {
+                x: half_width as f32,
+                y: half_height as f32,
+            },
+        ));
     }
 }
 

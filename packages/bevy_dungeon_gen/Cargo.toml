@@ -1,11 +1,9 @@
 [package]
-name = "crabbooru"
+name = "bevy_dungeon_gen"
 version = "0.1.0"
 edition = "2021"
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [dependencies]
-session_types = "0.3.1"
-url = { version = "2.5.0", features = ["serde"] }
-winit = "0.29.4"
+bevy = "0.12.0"

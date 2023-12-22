@@ -1,14 +1,32 @@
 use crate::{Dungeon, GameState, MoveMode, Movement};
-use comfy::*;
+use comfy::{epaint::Pos2, *};
 use specs::Entities;
 
 pub struct MobAI {}
-struct Mob {}
+#[derive(Debug)]
+struct Mob {
+    pub name: String,
+    pub position: Pos2,
+    pub velocity: Vec2,
+    pub move_timer: f32,
+    pub move_target: Pos2,
+}
+impl Mob {
+    pub fn new(position: Pos2) -> Self {
+        Self {
+            position,
+            name: "dummy".to_string(),
+            velocity: Vec2::ZERO,
+            move_timer: 0.0,
+            move_target: position,
+        }
+    }
+}
 type SystemData = (Entities<'static>, Transform, MoveMode, Dungeon);
 impl MobAI {
     pub fn run(&mut self, state: &mut GameState, _c: &EngineContext) {
         for (_entity, (_transform, mode)) in
-            world().query::<(&Transform, &mut MoveMode)>().iter()
+            world().query::<(&mut Transform, &mut MoveMode)>().iter()
         {
             let mut moved = false;
             let mut move_dir = Vec2::ZERO;
@@ -49,9 +67,9 @@ impl MobAI {
                                 .map
                                 .xy_idx(_transform.position.y as i32, _transform.position.y as i32);
                             state.map.walls[idx] = false;
-
-                            // transform.0.position.x = x;
-                            // transform.0.position.y = y;
+                            _transform.position.x = move_dir.x;
+                            _transform.position.y = move_dir.y;
+                            state.map.walls[destination] = true;
                         }
                     }
                 }

@@ -52,6 +52,6 @@ impl GameState {
 // env_logger::filter::Filter::filter("info,wgpu_core=warn,wgpu_hal=warn,dungeon_ai=debug");
 
 pub fn game_update(_state: &mut GameState, _c: &mut EngineContext) {
-    let viewport = main_camera().world_viewport();
-
+    let _viewport = main_camera().world_viewport();   
+    _state.run_systems(_c);
 }
