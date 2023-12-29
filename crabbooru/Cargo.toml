@@ -9,3 +9,6 @@ edition = "2021"
 session_types = "0.3.1"
 url = { version = "2.5.0", features = ["serde"] }
 winit = "0.29.4"
+
+[workspace]
+members = ["model", "client", "e2e"]

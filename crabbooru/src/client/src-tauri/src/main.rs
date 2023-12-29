@@ -4,7 +4,7 @@ pub mod viewer;
 pub use api::*;
 pub use viewer::*; 
 // use session_types::*;
-
+extern crate model;
 use std::{
     any::{Any, TypeId},
     collections::HashMap,
@@ -24,6 +24,11 @@ fn get_sources(profile: String, sites: Vec<Site>) -> Vec<Site> {
     let mut sources = SourcesWindow::new(profile, sites, 
                                          0);
     sources.selected
+}
+
+#[tauri::command]
+fn main_window() {
+todo!()
 }
 
 fn main() {
