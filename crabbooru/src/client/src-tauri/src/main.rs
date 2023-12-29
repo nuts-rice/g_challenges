@@ -35,6 +35,9 @@ fn main() {
     // let sources_window =
     //     viewer::SourcesWindow::sources_window(&mut sources, &egui::Context::default());
     tauri::Builder::default()
+        .invoke_handler(tauri::generate_handler![
+            get_sources
+        ])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");
     
