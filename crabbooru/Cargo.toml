@@ -7,8 +7,10 @@ edition = "2021"
 
 [dependencies]
 session_types = "0.3.1"
+tracing = "0.1.40"
+tracing-subscriber = { version = "0.3.18", features = ["env-filter"] }
 url = { version = "2.5.0", features = ["serde"] }
 winit = "0.29.4"
 
-[workspace]
-members = ["model", "client", "e2e"]
+# [workspace]
+# members = ["model", "client", "e2e"]

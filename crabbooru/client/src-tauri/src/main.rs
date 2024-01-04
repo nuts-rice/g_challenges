@@ -3,8 +3,10 @@ pub mod api;
 pub mod viewer;
 pub use api::*;
 pub use viewer::*; 
+use tracing::info;
+use tracing_subscriber;
 // use session_types::*;
-extern crate model;
+// extern crate model;
 use std::{
     any::{Any, TypeId},
     collections::HashMap,
@@ -23,7 +25,9 @@ pub use viewer::*;
 fn get_sources(profile: String, sites: Vec<Site>) -> Vec<Site> {
     let mut sources = SourcesWindow::new(profile, sites, 
                                          0);
+    info!("sources: {:?}", sources);
     sources.selected
+
 }
 
 #[tauri::command]
@@ -35,6 +39,7 @@ fn main() {
 
     let sites: Vec<Site> = Vec::new();
     let mut profile = "default".to_string();
+    tracing_subscriber::fmt::init();
     // let mut sources =
     //     viewer::SourcesWindow::new(profile, sites, egui_winit::winit::window::WindowId::from(0));
     // let sources_window =

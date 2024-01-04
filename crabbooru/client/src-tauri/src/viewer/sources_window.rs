@@ -7,6 +7,7 @@ use url::Url;
 pub type Profile = String;
 
 type SourceUrl = String;
+#[derive(Debug, Clone)]
 pub struct SourcesWindow {
     profile: Option<Profile>,
     pub selected: Vec<Site>,
