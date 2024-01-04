@@ -1,17 +1,15 @@
 <script>
-	import Counter from './Counter.svelte';
   import SourcesWindow from './SourcesWindow.svelte';
-	import welcome from '$lib/images/svelte-welcome.webp';
-	import welcome_fallback from '$lib/images/svelte-welcome.png';
+  import MainWindow from './MainWindow.svelte';
 </script>
 
 <svelte:head>
 	<title>Home</title>
-	<meta name="description" content="Svelte demo app" />
+	<meta name="description" content="Booru app" />
 </svelte:head>
 <section>
 	<SourcesWindow />
-
+  
 </section>
 
 <style>
@@ -42,4 +40,11 @@
 		top: 0;
 		display: block;
 	}
+  .sources {
+    display: flex;
+    flex-direction: row;
+    justify-content: center;
+    align-items: center;
+    flex-wrap: wrap;
+  }
 </style>

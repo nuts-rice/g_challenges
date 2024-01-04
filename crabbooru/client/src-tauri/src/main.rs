@@ -31,12 +31,19 @@ fn get_sources(profile: String, sites: Vec<Site>) -> Vec<Site> {
 }
 
 #[tauri::command]
+fn fetch_profile(profile: String){
+println!("profile: {}", profile);
+todo!()
+}
+
+#[tauri::command]
 fn main_window() {
 todo!()
 }
 
 fn main() {
 
+tracing_subscriber::fmt().init();
     let sites: Vec<Site> = Vec::new();
     let mut profile = "default".to_string();
     tracing_subscriber::fmt::init();
@@ -46,7 +53,9 @@ fn main() {
     //     viewer::SourcesWindow::sources_window(&mut sources, &egui::Context::default());
     tauri::Builder::default()
         .invoke_handler(tauri::generate_handler![
-            get_sources
+                        main_window,
+                        get_sources,
+                        fetch_profile
         ])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");
