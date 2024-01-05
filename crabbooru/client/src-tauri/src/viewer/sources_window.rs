@@ -1,7 +1,7 @@
 pub use crate::api::Api;
 pub use crate::api::{Page, Site};
-use std::collections::HashMap;
-use url::Url;
+
+
 
 //TODO: Profile or import
 pub type Profile = String;
@@ -44,48 +44,48 @@ impl SourcesWindow {
     //         };
     //     }
     // }
-    pub fn sources_window(&mut self, ) -> Result<()> {
-    //    let event_loop = EventLoop::new();
-    //    let mut builder = WindowBuilder::new()
-    //        .with_title("Sources")
-    //        .with_inner_size(winit::dpi::LogicalSize::new(400, 200));
-    //    let mut platform = Platform::new(PlatformDescriptor {
-    //        physical_width: 400,
-    //        physical_height: 200,
-    //        scale_factor: 1.0,
-    //        font_definitions: Default::default(),
-    //        style: Default::default(),
-    //    });
+    pub fn sources_window(&mut self) -> Result<()> {
+        //    let event_loop = EventLoop::new();
+        //    let mut builder = WindowBuilder::new()
+        //        .with_title("Sources")
+        //        .with_inner_size(winit::dpi::LogicalSize::new(400, 200));
+        //    let mut platform = Platform::new(PlatformDescriptor {
+        //        physical_width: 400,
+        //        physical_height: 200,
+        //        scale_factor: 1.0,
+        //        font_definitions: Default::default(),
+        //        style: Default::default(),
+        //    });
 
-    //    let mut selected_state = false;
-    //    let window = builder.build(&event_loop).unwrap();
+        //    let mut selected_state = false;
+        //    let window = builder.build(&event_loop).unwrap();
 
-    //    event_loop.run(move |event: Event<()>, _, control_flow| {
-    //        *control_flow = ControlFlow::Wait;
-    //        platform.handle_event(&event);
-    //        match event {
-    //            winit::event::Event::RedrawRequested(_) => {
-    //                platform.begin_frame();
+        //    event_loop.run(move |event: Event<()>, _, control_flow| {
+        //        *control_flow = ControlFlow::Wait;
+        //        platform.handle_event(&event);
+        //        match event {
+        //            winit::event::Event::RedrawRequested(_) => {
+        //                platform.begin_frame();
 
-    //                egui::CentralPanel::default().show(
-    //                    &platform.context(),
-    //                    //&platform.context(),
-    //                    |ui| {
-    //                        ui.label("source");
-    //                        ui.checkbox(&mut selected_state, "Source check");
-    //                    },
-    //                );
-    //                // let (output, paint_commands) = platform.end_frame(Some(&window));
-    //                // let paint_jobs = platform.context().tessellate(paint_commands);
+        //                egui::CentralPanel::default().show(
+        //                    &platform.context(),
+        //                    //&platform.context(),
+        //                    |ui| {
+        //                        ui.label("source");
+        //                        ui.checkbox(&mut selected_state, "Source check");
+        //                    },
+        //                );
+        //                // let (output, paint_commands) = platform.end_frame(Some(&window));
+        //                // let paint_jobs = platform.context().tessellate(paint_commands);
 
-    //                window.request_redraw();
-    //            }
-    //            winit::event::Event::MainEventsCleared => {
-    //                window.request_redraw();
-    //            }
-    //            _ => (),
-    //        }
-    //    });
+        //                window.request_redraw();
+        //            }
+        //            winit::event::Event::MainEventsCleared => {
+        //                window.request_redraw();
+        //            }
+        //            _ => (),
+        //        }
+        //    });
 
         // if let Event::WindowEvent { window_id, event } = event {
         //     match event {
@@ -117,10 +117,10 @@ impl SourcesWindow {
 
         todo!();
     }
-    pub fn add_source(&mut self, url: SourceUrl) {
+    pub fn add_source(&mut self, _url: SourceUrl) {
         todo!()
     }
-    pub fn is_source_valid(&self, url: SourceUrl) -> bool {
+    pub fn is_source_valid(&self, _url: SourceUrl) -> bool {
         todo!()
     }
     pub fn check_all_sources(&self) {
@@ -134,9 +134,9 @@ impl SourcesWindow {
     }
 
     pub fn check_updates(&self) {
-        let mut is_checked: bool = false;
-        let mut is_unchecked: bool = false;
-        for row in self.selected.iter() {
+        let _is_checked: bool = false;
+        let _is_unchecked: bool = false;
+        for _row in self.selected.iter() {
             // if row.is_checked() {
             //     row.;
             // }

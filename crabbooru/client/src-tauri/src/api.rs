@@ -2,7 +2,7 @@ use async_trait::async_trait;
 use reqwest::{header, header::HeaderMap, Error};
 use serde::{Deserialize, Serialize};
 use std::{
-    any::{Any, TypeId},
+    any::{Any},
     collections::HashMap,
 };
 type Result<T> = std::result::Result<T, Error>;
@@ -116,7 +116,7 @@ impl<T: Api + Any> ApiBuilder<T> {
         }
     }
 
-    async fn get_image<I: Api + Any, S: Api + Any>(&self, page: PageUrl) -> Result<Vec<Post>> {
+    async fn get_image(&self, page: PageUrl) -> Result<Vec<Post>> {
         let url = page.url.as_str();
         let tags = self.tags.join(" ");
         let response = self
@@ -245,7 +245,7 @@ impl Api for DanbooruClient {
 
         Ok(response)
     }
-    async fn get_by_id(&self, id: u32) -> Result<Vec<Image>> {
+    async fn get_by_id(&self, _id: u32) -> Result<Vec<Image>> {
         unimplemented!()
     }
 }
@@ -312,6 +312,6 @@ mod test {
         let builder = ApiBuilder::<TestbooruClient>::new()
             .tag(tags[0].clone())
             .tag(tags[1].clone());
-        let api = builder.build().get().await;
+        let _api = builder.build().get().await;
     }
 }

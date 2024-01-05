@@ -2,16 +2,13 @@
 pub mod api;
 pub mod viewer;
 pub use api::*;
-pub use viewer::*; 
 use tracing::info;
-use tracing_subscriber;
+
+pub use viewer::*;
 // use session_types::*;
 // extern crate model;
-use std::{
-    any::{Any, TypeId},
-    collections::HashMap,
-};
-pub use viewer::*;
+
+
 // type Gallery<I: Api + Any> = Vec<I::Image>;
 // type Client<I: Api + Any> = Send<u32, Recv<Gallery<I>, Eps>>;
 // fn query_id<I: Api + Any>(c: Chan<(), Client<I>>){
@@ -23,29 +20,26 @@ pub use viewer::*;
 
 #[tauri::command]
 fn get_sources(profile: String, sites: Vec<Site>) -> Vec<Site> {
-    let mut sources = SourcesWindow::new(profile, sites, 
-                                         0);
+    let sources = SourcesWindow::new(profile, sites, 0);
     info!("sources: {:?}", sources);
     sources.selected
-
 }
 
 #[tauri::command]
-fn fetch_profile(profile: String){
-println!("profile: {}", profile);
-todo!()
+fn fetch_profile(profile: String) {
+    println!("profile: {}", profile);
+    todo!()
 }
 
 #[tauri::command]
 fn main_window() {
-todo!()
+    todo!()
 }
 
 fn main() {
-
-tracing_subscriber::fmt().init();
-    let sites: Vec<Site> = Vec::new();
-    let mut profile = "default".to_string();
+    tracing_subscriber::fmt().init();
+    let _sites: Vec<Site> = Vec::new();
+    let _profile = "default".to_string();
     tracing_subscriber::fmt::init();
     // let mut sources =
     //     viewer::SourcesWindow::new(profile, sites, egui_winit::winit::window::WindowId::from(0));
@@ -53,11 +47,10 @@ tracing_subscriber::fmt().init();
     //     viewer::SourcesWindow::sources_window(&mut sources, &egui::Context::default());
     tauri::Builder::default()
         .invoke_handler(tauri::generate_handler![
-                        main_window,
-                        get_sources,
-                        fetch_profile
+            main_window,
+            get_sources,
+            fetch_profile
         ])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");
-    
 }
