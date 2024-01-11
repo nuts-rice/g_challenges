@@ -1,5 +1,6 @@
 use comfy::*;
-simple_game!("cloth cutting demo", setup, update);
+use verlet::prelude::*;
+simple_game!("cloth cutting demo", VerletState, update);
 pub struct CameraSettings {
     pub use_camera_override: bool,
     pub offset: Vec2,
@@ -20,7 +21,7 @@ impl Default for CameraSettings {
 pub static CAMERA_SETTINGS: Lazy<AtomicRefCell<CameraSettings>> =
     Lazy::new(|| AtomicRefCell::new(CameraSettings::default()));
 
-fn setup(_c: &mut EngineContext) {
+fn setup(c: &mut EngineContext, state: &mut VerletState) {
     main_camera_mut().matrix_fn = Some(Box::new(|_, center: Vec2| {
         let settings = CAMERA_SETTINGS.borrow();
 
@@ -33,6 +34,10 @@ fn setup(_c: &mut EngineContext) {
 
         perspective * view
     }));
-}
+    let (points_w, points_h) = (139, 80);
+    let rbd_handle =  
+
+
+    }
 
 fn update(_c: &mut EngineContext) {}
