@@ -50,6 +50,10 @@ impl GameLoop for VerletState {
     }
 
     fn update(&mut self, _c: &mut EngineContext) {
+        _c.load_texture_from_bytes("point", include_bytes!(concat!(
+            env!("CARGO_MANIFEST_DIR"),
+            "/../assets/point.png")),
+            );
         let gravity = self.physics.gravity * delta();
         let friction = self.friction;
         let (origin_x, origin_y) = (-120., 120.);
@@ -63,9 +67,15 @@ impl GameLoop for VerletState {
             let y = points_y as f32 * 0.5;
             let rbd_handle = self.physics.insert_rbd(RigidBodyBuilder::new().position(vec2(x, y)).build());
             self.physics.insert_collider_with_parent(ColliderBuilder::new().build(), rbd_handle,);
-            commands().spawn((Transform::position(vec2(x , y )),
+            let mut cmd = commands().spawn((
+                    Transform::position(vec2(x , y )),
             VerletPoint{position: vec2(x, y), old_position: Some(vec2(x, y)), acceleration: gravity, mass: 1.0, is_pinned: false}));
-             
+        // if points_y == 0 {
+        //     commands().insert(cmd, (components::VerletLocked));
+
+        //                       }  
+        // entities.push(cmd));
+
 
             // let point = VerletPoint{position: vec2(x, y), old_position: Some(vec2(x, y)), acceleration: gravity, mass: 1.0, is_pinned: false};
             // world().spawn((point,));
@@ -76,6 +86,7 @@ impl GameLoop for VerletState {
         draw_circle(body.transform.translation, 0.1, RED.alpha(0.8), 5);
         }
         for constraint in self.physics.constraints.iter() {
+
             // let constraint = components::Constraint{point_a: constraint.  , point_b: constraint.position + constraint.radius, length: constraint.length} ;
             draw_line(
                 constraint.position,
