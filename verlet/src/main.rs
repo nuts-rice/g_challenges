@@ -1,3 +1,5 @@
+use std::process::Command;
+
 use blobs::*;
 use comfy::*;
 pub mod components;
@@ -47,11 +49,13 @@ impl GameLoop for VerletState {
         state
             .physics
             .insert_collider_with_parent(ColliderBuilder::new().build(), rbd_handle);
+        main_camera_mut().center = Vec2::from([10., 10.]); 
 
         state
     }
 
     fn update(&mut self, _c: &mut EngineContext) {
+        clear_background(GRAY);
         _c.load_texture_from_bytes(
             "point",
             include_bytes!(concat!(env!("CARGO_MANIFEST_DIR"), "/../assets/point.png")),
@@ -61,23 +65,23 @@ impl GameLoop for VerletState {
         let (_origin_x, _origin_y) = (-120., 120.);
         let (points_x, points_y) = (15, 15);
         let mut _entities: Vec<Entity> = Vec::new();
-        for points_x in 0..points_x {
-            for points_y in 0..points_y {
+        for j in 0..points_y {
+            for i in 0..points_x {
                 // let mut cmd = commands().spawn((Transform::from(origin_x + (10. * x as f32 ), origin_y + (-10. * y as f32), 0.,)),
                 // );
-                let x = points_x as f32 * 0.5;
-                let y = points_y as f32 * 0.5;
+                // let x = points_x as f32 * 0.5;
+                // let y = points_y as f32 * 0.5;
                 let rbd_handle = self
                     .physics
-                    .insert_rbd(RigidBodyBuilder::new().position(vec2(x, y)).build());
+                    .insert_rbd(RigidBodyBuilder::new().position(vec2(i as f32, j as f32)).build());
                 self.physics
                     .insert_collider_with_parent(ColliderBuilder::new().build(), rbd_handle);
                 let _cmd = commands().spawn((
                     Sprite::new("point".to_string(), vec2(0.5, 0.5), 3, WHITE),
-                    Transform::position(vec2(x, y)),
+                    Transform::position(vec2(i as f32, j as f32)),
                     VerletPoint {
-                        position: vec2(x, y),
-                        old_position: Some(vec2(x, y)),
+                        position: vec2(i as f32, j as f32),
+                        old_position: Some(vec2(i as f32, j as f32)),
                         acceleration: gravity,
                         mass: 1.0,
                         is_pinned: false,
@@ -95,26 +99,34 @@ impl GameLoop for VerletState {
                 // world().spawn((point,));
             }
         }
-        let _debug = self.physics.debug_data();
         // for body in debug.bodies.iter() {
         // draw_circle(body.transform.translation, 0.1, RED.alpha(0.8), 5);
         // }
-        for constraint in self.physics.constraints.iter() {
+        // for constraint in self.physics.constraints.iter() {
             // let constraint = components::Constraint{point_a: constraint.  , point_b: constraint.position + constraint.radius, length: constraint.length} ;
-            draw_line(
-                constraint.position,
-                constraint.position + constraint.radius,
-                10.,
-                WHITE.alpha(0.5),
-                5,
-            );
-        }
+            // draw_line(
+            //     constraint.position,
+            //     constraint.position + constraint.radius,
+            //     10.,
+            //     WHITE.alpha(0.5),
+            //     5,
+            // );
+        // }
         for (_entity, (transform, point)) in
             &mut world().query::<(&mut Transform, &mut VerletPoint)>().iter()
         {
         _entities.push(_entity);
             // spawn_line(_c, _entity, &_entities, 0.5, Some(1));
             systems::update_point(transform, point, gravity, friction);
+            draw_line(
+                point.position,
+                point.old_position.unwrap(),
+                0.1,
+                WHITE.alpha(0.5),
+                5,
+            );
+                    
+
 
         }
         for (i, entity) in _entities.iter().enumerate() {
@@ -126,8 +138,30 @@ impl GameLoop for VerletState {
             };
             spawn_line(_c, *entity, &_entities, 0.5, above);
             spawn_line(_c, *entity, &_entities, 0.5, left);
+            // draw_line(vec2(left.unwrap() as f32, above.unwrap() as f32), vec2(left.unwrap() as f32 + 0.5, above.unwrap() as f32 + 0.5), 0.1, WHITE.alpha(0.5), 5);
+
 
         }
+        let debug = self.physics.debug_data();
+        for body in debug.bodies.iter() {
+            draw_circle(body.transform.translation, 0.1, GREEN.alpha(0.3), 5);
+        }
+//TODO: Fix this
+        if is_mouse_button_pressed(MouseButton::Left)  {
+        let mouse_pos = mouse_world();
+        for (_entity, (transform, point, constraint)) in &mut world().query::<(&mut Transform, &mut VerletPoint, &mut components::Constraint)>().iter() {
+        let distance_a = mouse_pos.distance(point.position);
+        let distance_b = mouse_pos.distance(point.old_position.unwrap());
+        if distance_a > 0. && distance_a <= 1. && distance_b > 0. && distance_b <= 1. {
+            commands().despawn(_entity);
+        }
+        }
+
+
+
+
+        }
+
 
         // for (_, (transform, point)) in
         //     &mut world().query::<(&mut Transform, &mut VerletPoint)>().iter()
@@ -138,10 +172,29 @@ impl GameLoop for VerletState {
     }
 }
 
-fn build_cloth() {
-    todo!()
+fn build_cloth(physics: &mut Physics, gravity: f32, points_x: usize, points_y: usize)  -> Vec<()> {
+    let mut cmd = Vec::new();
+    for x in 0..points_x {
+        for y in 0..points_y {
+            let rbd_handle = physics.insert_rbd(RigidBodyBuilder::new().position(vec2(x as f32, y as f32)).build());
+            physics.insert_collider_with_parent(ColliderBuilder::new().build(), rbd_handle);
+            cmd.push(commands().spawn((
+                Sprite::new("point".to_string(), vec2(0.5, 0.5), 3, WHITE),
+                Transform::position(vec2(x as f32, y as f32)),
+            VerletPoint {
+                position: vec2(x as f32, y as f32),
+                old_position: Some(vec2(x as f32, y as f32)),
+                acceleration: vec2(0., gravity),
+                mass: 1.0,
+                is_pinned: false,
+            },
+            
+            )));
+        }
+    }
+    cmd
 }
-fn cut_cloth() {
+fn cut_cloth(mouse_pos: Vec2, cloth: Vec<Entity>){
    todo!() 
 }
 
@@ -151,7 +204,7 @@ fn spawn_line(
     entities: &[Entity],
     length: f32,
     coord: Option<usize>,
-) {
+)  { 
     if let Some(i) = coord {
         let other = entities[i];
         commands().spawn((components::Constraint {
