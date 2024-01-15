@@ -1,8 +1,6 @@
+use crate::VerletState;
 use comfy::*;
-use crate::{components::{VerletPoint, Constraint, }, VerletState };
 
-
-fn update_constraints(state: VerletState, c: &mut EngineContext) {
-todo!() 
+fn update_constraints(_state: VerletState, _c: &mut EngineContext) {
+    todo!()
 }
-

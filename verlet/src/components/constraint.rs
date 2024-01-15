@@ -1,5 +1,4 @@
 use comfy::*;
-use blobs::*;
 
 #[derive(Debug, Clone)]
 pub struct Constraint {
