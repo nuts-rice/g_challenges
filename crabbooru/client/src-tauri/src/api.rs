@@ -1,10 +1,7 @@
 use async_trait::async_trait;
 use reqwest::{header, header::HeaderMap, Error};
 use serde::{Deserialize, Serialize};
-use std::{
-    any::{Any},
-    collections::HashMap,
-};
+use std::{any::Any, collections::HashMap};
 type Result<T> = std::result::Result<T, Error>;
 #[derive(Debug, Deserialize, Serialize, Clone)]
 pub struct PageUrl {
@@ -89,6 +86,15 @@ impl<T: Api + Any> ApiBuilder<T> {
         String::from("")
     }
 
+    pub fn get_headers() -> HeaderMap {
+        let mut headers = HeaderMap::new();
+        headers.insert(
+            header::USER_AGENT,
+            header::HeaderValue::from_static("PostmanRuntime/7.30.0"),
+        );
+        headers
+    }
+
     pub fn default_url(mut self, url: &str) -> Self {
         self.url = url.to_string();
         self
@@ -98,7 +104,7 @@ impl<T: Api + Any> ApiBuilder<T> {
         self.user = Some(user);
         self
     }
-    async fn get_page(&self, _url: String, _headers: HashMap<String, String>) -> Result<PageUrl> {
+    pub async fn get_page(&self, _url: String, _headers: HashMap<String, String>) -> Result<PageUrl> {
         let result = self.client.get(_url.as_str()).send().await;
         match result {
             Ok(result) => {
@@ -116,12 +122,13 @@ impl<T: Api + Any> ApiBuilder<T> {
         }
     }
 
-    async fn get_image(&self, page: PageUrl) -> Result<Vec<Post>> {
+    pub async fn get_image(&self, page: PageUrl) -> Result<Vec<Post>> {
         let url = page.url.as_str();
         let tags = self.tags.join(" ");
         let response = self
             .client
             .get(format!("{url}/posts.json"))
+            .headers(get_headers())
             .query(&[
                 ("limit", self.limit.to_string().as_str()),
                 ("tags", tags.as_str()),
@@ -281,7 +288,7 @@ impl Api for TestbooruClient {
 
         Ok(response)
     }
-    async fn get_by_id(&self, id: u32) -> Result<Vec<Image>> {
+   async fn get_by_id(&self, id: u32) -> Result<Vec<Image>> {
         let builder = &self.0;
         let tag_string = builder.tags.join(" ");
         let url = builder.url.as_str();

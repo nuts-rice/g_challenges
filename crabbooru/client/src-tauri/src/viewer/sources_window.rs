@@ -1,8 +1,6 @@
 pub use crate::api::Api;
 pub use crate::api::{Page, Site};
 
-
-
 //TODO: Profile or import
 pub type Profile = String;
 
