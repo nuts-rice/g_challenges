@@ -1,0 +1,41 @@
+<head>
+<title> CrabbooruUi </title>
+<meta content="width=device-width, initial-scale=1" name="viewport">
+</head>
+<app-root></app-root>
+</div>
+<div>
+  Tags List
+
+<div>
+Tags : <input type="text" id="tags" />
+<button > Search </button>
+</div>
+<Table/>
+
+<script>
+
+const images = [];
+let tags = [];
+  
+
+function OnSearch()
+{
+  var tags = document.getElementById("tags").value;
+  window.location.href = "http://localhost:8080/search?tags=" + tags;
+
+}
+
+
+
+</script>
+
+<style>
+	section {
+		display: flex;
+		flex-direction: column;
+		justify-content: center;
+		align-items: center;
+		flex: 0.6;
+	}
+</style>

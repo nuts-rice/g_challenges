@@ -1,6 +1,7 @@
 <script>
   import SourcesWindow from './SourcesWindow.svelte';
   import MainWindow from './MainWindow.svelte';
+  import Table from '../components/Table/table.svelte';
 </script>
 
 <svelte:head>
@@ -9,9 +10,18 @@
 </svelte:head>
 <section>
 	<SourcesWindow />
+
   
 </section>
 
+
+<section>
+//<MainWindow />
+</section>
+
+<section>
+	<Table />
+</section>
 <style>
 	section {
 		display: flex;

@@ -3,11 +3,11 @@ use reqwest::{header, header::HeaderMap, Error};
 use serde::{Deserialize, Serialize};
 use std::{any::Any, collections::HashMap};
 type Result<T> = std::result::Result<T, Error>;
-#[derive(Debug, Deserialize, Serialize, Clone)]
+#[derive(Debug, Deserialize, Serialize, Clone, )]
 pub struct PageUrl {
-    error: String,
+    pub error: String,
     pub url: String,
-    headers: HashMap<String, String>,
+    pub headers: HashMap<String, String>,
 }
 
 pub struct ParsedPage {
