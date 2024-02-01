@@ -1,12 +1,12 @@
 {
   "build": {
     "distDir": [
-      "index.html"
+      "../dist"
     ],
-    "devPath": [
-      "index.html"
-    ],
-    "withGlobalTauri": true
+    "devPath": "http://localhost:3000",
+    "beforeDevCommand": "npm run dev",
+    "beforeBuildCommand": "npm run build",    
+    "withGlobalTauri":false 
   },
   "package": {
     "productName": "crabboru",

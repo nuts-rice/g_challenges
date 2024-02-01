@@ -1,19 +1,24 @@
 <svelte:options tag="cobalt-grid"/>
 <script>
-import {paginate, LightPaginationNav} from 'svelte-paginate';  
+import {Grid, Row, Column}    from "carbon-components-svelte";
+import {paginate, LightPaginationNav} from 'svelte-paginate'; 
+import {writable, derived} from 'svelte/store';
 import {invoke} from '@tauri-apps/api/tauri';
 import {onMount} from 'svelte';
+import itemCount from "./table.svelte";
 // export let src="";
 // export let alt="";
 // export let is_loaded = false;
 // export let imgs = [...];  
-export let columns = "2";
+export let columns = "4";
 export let rows = "4";
 export let border = "1px solid #000000";
-let colInt = parseInt(columns, 0);
-let rowInt = parseInt(rows, 0);
-// export let currentPage = 1 ;
-// export let perPage = 5;
+let colInt = parseInt(columns, 10);
+let rowInt = parseInt(rows, 10);
+export const currentPage = writable(1) ;
+export let perPage = 10;
+export const totalPages = derived(itemCount, ($itemCount) => Math.ceil($itemCount / perPage));
+
 // export let trimmedRows;
 // $: paginatedImgs = paginate({imgs, perPage, currentPage})
 
@@ -32,10 +37,11 @@ let rowInt = parseInt(rows, 0);
    <button on:click={() => currentPage -= 1}
     >  -->
 
+    
 <div
 style="
-grid-template-columns: repeat({colInt}, 1fr);
-grid-template-rows: repeat({rowInt}, 1fr); 
+grid-template-columns: repeat({colInt}, auto);
+grid-template-rows: repeat({rowInt}, 4fr); 
 border: {border};
 "
 >

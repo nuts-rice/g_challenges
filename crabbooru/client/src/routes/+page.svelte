@@ -3,23 +3,21 @@
   import MainWindow from './MainWindow.svelte';
   import Table from '../components/Table/table.svelte';
 </script>
+<head>
+<title> CrabbooruUi </title>
+<meta content="width=device-width, initial-scale=1" name="viewport">
+</head>
+<app-root></app-root>
+<div>
+  Tags List
 
-<svelte:head>
-	<title>Home</title>
-	<meta name="description" content="Booru app" />
-</svelte:head>
-<section>
-	<SourcesWindow />
+</div>
+Tags : <input type="text" id="tags" />
+<button > Search </button>
 
-  
-</section>
-
-
-<section>
-//<MainWindow />
-</section>
 
 <section>
+	Image gallery goes here
 	<Table />
 </section>
 <style>

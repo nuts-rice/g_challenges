@@ -2,6 +2,8 @@ use async_trait::async_trait;
 use reqwest::{header, header::HeaderMap, Error};
 use serde::{Deserialize, Serialize};
 use std::{any::Any, collections::HashMap};
+use tauri::State;
+
 type Result<T> = std::result::Result<T, Error>;
 #[derive(Debug, Deserialize, Serialize, Clone, )]
 pub struct PageUrl {
@@ -48,6 +50,8 @@ pub struct Post {
 pub type Image = Post;
 pub type Page = ParsedPage;
 pub type Site = PageUrl;
+pub type DanbooruAccess = State<ApiBuilder<DanbooruClient>>;
+pub type TestbooruAccess = State<ApiBuilder<TestbooruClient>>;
 
 #[async_trait]
 pub trait Api: From<ApiBuilder<Self>> + Any {
