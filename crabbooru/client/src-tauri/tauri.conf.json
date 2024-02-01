@@ -6,7 +6,7 @@
     "devPath": "http://localhost:3000",
     "beforeDevCommand": "npm run dev",
     "beforeBuildCommand": "npm run build",    
-    "withGlobalTauri":false 
+    "withGlobalTauri":true 
   },
   "package": {
     "productName": "crabboru",

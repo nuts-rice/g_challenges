@@ -1,14 +1,18 @@
 #![cfg_attr(not(debug_assertions), windows_subsystem = "windows")]
-use tauri::{CustomMenuItem, Menu, MenuItem, Submenu};
+use tauri::{CustomMenuItem, Menu, MenuItem, Submenu, };
 pub mod api;
 pub mod viewer;
 pub mod model;
+pub mod error;
 pub use api::*;
+pub use error::*;
 pub use viewer::*;
 pub use model::*;   
-use tracing::info;
 
 pub use viewer::*;
+// pub type Result<T> = std::result::Result<T, Box<dyn std::error::Error>>;
+
+
 // use session_types::*;
 // extern crate model;
 
@@ -34,12 +38,18 @@ fn fetch_profile(profile: String) {
     println!("profile: {}", profile);
     todo!()
 }
-
-// remember to call `.manage(MyState::default())`
+//TODO: bunch of trait bounds stuff
 #[tauri::command]
-fn get_images(api_state: TestbooruAccess<'_>, id: u32) -> Result<Vec<Image>> {
-    let images = api_state.get_by_id(id).await?;
-    Ok(images)
+async fn get_images_cmd(api_state: TestbooruAccess<'_>, url: PageUrl) -> Result<Vec<Image>, CrabbooruError> {
+//Result<Vec<Image>>  { 
+    let api = api_state.inner().clone();
+    let images = api.get_image(url).await;
+    Ok(images.unwrap())
+    //Ok(images)
+}
+#[tauri::command]
+async fn get_pages(api_state: TestbooruAccess<'_>) -> Result<Vec<PageUrl>, CrabbooruError> {
+    todo!()
 }
 #[tauri::command]
 fn main_window() {
@@ -50,7 +60,6 @@ fn main() {
 //    tracing_subscriber::fmt().init();
     let _sites: Vec<Site> = Vec::new();
     let _profile = "default".to_string();
-    let test_acess
     // tracing_subscriber::fmt::init();
     // let mut sources =
     //     viewer::SourcesWindow::new(profile, sites, egui_winit::winit::window::WindowId::from(0));
@@ -78,11 +87,12 @@ fn main() {
         .add_submenu(view_submenu);
     
     tauri::Builder::default()
+        .manage(TestbooruClient {inner: TestbooruClient::builder()})
     .invoke_handler(tauri::generate_handler![
         //     main_window,
         //     get_sources,
         //     fetch_profile
-        get_images
+        get_images_cmd
         ])
         .setup(|app| {
                 let window = tauri::WindowBuilder::new(app, "main-window".to_string(), tauri::WindowUrl::App("../index.html".into()))

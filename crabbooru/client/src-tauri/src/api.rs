@@ -50,8 +50,8 @@ pub struct Post {
 pub type Image = Post;
 pub type Page = ParsedPage;
 pub type Site = PageUrl;
-pub type DanbooruAccess = State<ApiBuilder<DanbooruClient>>;
-pub type TestbooruAccess = State<ApiBuilder<TestbooruClient>>;
+pub type DanbooruAccess<'a> = State<'a, ApiBuilder<DanbooruClient>>;
+pub type TestbooruAccess<'a> = State<'a, ApiBuilder<TestbooruClient>>;
 
 #[async_trait]
 pub trait Api: From<ApiBuilder<Self>> + Any {
@@ -166,6 +166,7 @@ impl<T: Api + Any> ApiBuilder<T> {
 
     pub fn build(self) -> T {
         T::from(self)
+            
     }
 
     pub fn set_url(mut self, url: String) -> Self {
@@ -224,10 +225,12 @@ pub fn get_headers() -> HeaderMap {
     );
     headers
 }
-pub struct DanbooruClient(ApiBuilder<Self>);
+pub struct DanbooruClient {
+    pub inner: ApiBuilder<Self> 
+}
 impl From<ApiBuilder<Self>> for DanbooruClient {
     fn from(builder: ApiBuilder<Self>) -> Self {
-        Self(builder)
+        Self{inner: builder}
     }
 }
 #[async_trait]
@@ -238,7 +241,7 @@ impl Api for DanbooruClient {
     const URL: &'static str = "https://danbooru.donmai.us";
     const SORT: &'static str = "date:";
     async fn get(&self) -> Result<Vec<Image>> {
-        let builder = &self.0;
+        let builder = &self.inner;
         let tag_string = builder.tags.join(" ");
         let url = builder.url.as_str();
         let response = builder
@@ -260,10 +263,12 @@ impl Api for DanbooruClient {
         unimplemented!()
     }
 }
-pub struct TestbooruClient(ApiBuilder<Self>);
+pub struct TestbooruClient{
+    pub inner: ApiBuilder<Self>}
+
 impl From<ApiBuilder<Self>> for TestbooruClient {
     fn from(builder: ApiBuilder<Self>) -> Self {
-        Self(builder)
+        Self{inner: builder}
     }
 }
 #[async_trait]
@@ -274,7 +279,7 @@ impl Api for TestbooruClient {
     const URL: &'static str = "https://testbooru.donmai.us";
     const SORT: &'static str = "date:";
     async fn get(&self) -> Result<Vec<Image>> {
-        let builder = &self.0;
+        let builder = &self.inner;
         let tag_string = builder.tags.join(" ");
         let url = builder.url.as_str();
         let response = builder
@@ -293,7 +298,7 @@ impl Api for TestbooruClient {
         Ok(response)
     }
    async fn get_by_id(&self, id: u32) -> Result<Vec<Image>> {
-        let builder = &self.0;
+        let builder = &self.inner;
         let tag_string = builder.tags.join(" ");
         let url = builder.url.as_str();
         let response = builder
