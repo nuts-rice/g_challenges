@@ -1,6 +1,9 @@
 #![cfg_attr(not(debug_assertions), windows_subsystem = "windows")]
-use tauri::{CustomMenuItem, Menu, MenuItem, Submenu, State};
+use tauri::{CustomMenuItem, Menu, MenuItem, Submenu, State, Manager, };
+use tracing::{info, debug};
 use std::collections::HashMap;
+use reqwest::header::USER_AGENT;
+use url::Url;
 pub mod api;
 pub mod viewer;
 pub mod model;
@@ -26,12 +29,13 @@ pub use viewer::*;
 //     }
 // }
 
-// #[tauri::command]
-// fn get_sources(profile: String, sites: Vec<Site>) -> Vec<Site> {
-//     let sources = SourcesWindow::new(profile, sites, 0);
-//     info!("sources: {:?}", sources);
-//     sources.selected
-// }
+#[tauri::command]
+async fn get_source(api_state: TestbooruAccess<'_>, ) -> Result<String, CrabbooruError> {
+    // let api = api_state.inner();
+    // let source = api::DanbooruClient::URL;
+    // Ok(PageUrl { error: String::from("Url error"), url: String::from(source), headers: HashMap::new() })
+todo!()
+}
 
 
 #[tauri::command]
@@ -39,20 +43,72 @@ fn fetch_profile(profile: String) {
     println!("profile: {}", profile);
     todo!()
 }
-//TODO: manage api state  
+
 #[tauri::command]
-async fn get_images_cmd(api_state: TestbooruAccess<'_>, url: PageUrl) -> Result<Vec<Image>, CrabbooruError> {
+async fn simple_download(url: String) -> Result<(), CrabbooruError> {
+    let user_agent = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/58.0.3029.110 Safari/537.3";
+    let client = reqwest::Client::new();
+    let response = client.get(&url).header(USER_AGENT, user_agent).send().await.or(Err(format!("Failed to GET from '{}'", &url))).unwrap();
+    let source_size = response.content_length().unwrap();
+    println!("source_size: {}", source_size);
+    println!("response: {:?}", response);
+    //let mut stream =  response.bytes_stream();
+        
+    Ok(())
+     
+}
+#[tauri::command]
+async fn simple_download_id(id: u32) -> Result<(), CrabbooruError> {
+    let user_agent = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/58.0.3029.110 Safari/537.3";
+    let client = reqwest::Client::new();
+    let response = client.get(format!("https://testbooru.donmai.us/posts/{}", &id)).header(USER_AGENT, user_agent).send().await.or(Err(format!("Failed to GET from '{}'", &id))).unwrap();
+    let source_size = response.content_length().unwrap();
+    println!("source_size: {}", source_size);
+    println!("response: {:?}", response);
+
+    //let mut stream =  response.bytes_stream();
+        
+    Ok(())
+     
+}
+
+#[tauri::command]
+async fn get_test_cmd(api_state: TestbooruAccess<'_>, id: u32) -> Result<TestbooruPost, CrabbooruError> {
 //Result<Vec<Image>>  { 
-    let api = api_state.inner().clone();
-    let images = api.get_image(url).await;
+    let api = api_state.inner();
+    let images = api.get_by_id(id).await;
+    println!("get_images_cmd: images: {:?}", images);
+    println!("images: {:?}", &images.as_ref().unwrap());
+    Ok(images.unwrap())
+    //Ok(images)
+}
+
+async fn get_all_tags_cmd(api_state: TestbooruAccess<'_>) -> Result<Vec<String>, CrabbooruError> {
+    todo!()
+    // let api = api_state.inner();
+    // let tags = api.get_all_tags().await;
+    // Ok(tags.unwrap())
+}
+
+
+// #[tauri::command]
+// async fn 
+//TODO: fix error here  
+#[tauri::command]
+async fn get_images_cmd(api_state: TestbooruAccess<'_>, id: u32) -> Result<TestbooruPost, CrabbooruError> {
+//Result<Vec<Image>>  { 
+    let api = api_state.inner();
+    println!("request: " , );
+    let images = api.get_by_id(id).await;
+    println!("get_images_cmd: images: {:?}", images);
+    println!("images: {:?}", &images.as_ref().unwrap());
     Ok(images.unwrap())
     //Ok(images)
 }
 #[tauri::command]
-async fn get_page_cmd(api_state: TestbooruAccess<'_>, url: String, headers: HashMap<String, String>) -> Result<PageUrl, CrabbooruError> {
+async fn get_page_cmd(api_state: TestbooruAccess<'_>, ) -> Result<(), CrabbooruError> {
     let api = api_state.inner().clone();
-    let page = api.get_page(url, headers).await;
-    Ok(page.unwrap())
+    Ok(())
 }
 #[tauri::command]
 async fn get_md5_db_cmd(api_state: TestbooruAccess<'_>) -> Result<(), CrabbooruError>{
@@ -60,7 +116,8 @@ todo!()
 }
 #[tauri::command]
 async fn connect_api_cmd(api_state: TestbooruAccess<'_>) -> Result<(), CrabbooruError>{
-    let api = api_state.inner().clone();
+    info!("connect_api_cmd");
+    let api = api_state.inner();
     Ok(())
 }
 #[tauri::command]
@@ -70,7 +127,7 @@ fn main_window() {
 
 fn main() {
 //    tracing_subscriber::fmt().init();
-    let _sites: Vec<Site> = Vec::new();
+    // let _sites: Vec<Site> = Vec::new();
     let _profile = "default".to_string();
     // tracing_subscriber::fmt::init();
     // let mut sources =
@@ -102,15 +159,14 @@ fn main() {
         .manage(TestbooruClient{inner: Default::default()})
         .manage(DanbooruClient{inner: Default::default()})
     .invoke_handler(tauri::generate_handler![
-                    connect_api_cmd,
-                    //TODO: apiState
-        //     main_window,
-        //     get_sources,
-        //     fetch_profile
+                    simple_download,
+                    // connect_api_cmd,
+            // get_source,
         // get_images_cmd
         ])
         .setup(|app| {
-                let window = tauri::WindowBuilder::new(app, "main-window".to_string(), tauri::WindowUrl::App("../index.html".into()))
+                let mut window = tauri::WindowBuilder::new(app, "main", 
+                                                       tauri::WindowUrl::App("./index.html".into()))
                     .menu(menu)
                     .build()?;
                 let app_handle = app.handle();

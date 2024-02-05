@@ -1,15 +1,14 @@
 use chrono::{DateTime, Utc};
-use crate::Site;
 pub struct Favorite {
     name: String,
     note: i32,
     lastViewed: DateTime<Utc>,
     imgPath: String,
-    sites: Vec<Site>,
+    sites: Vec<String>,
 }
 
 impl Favorite {
-    pub fn new(name: String, note: i32, lastViewed: DateTime<Utc>, imgPath: String, sites: Vec<Site>) -> Self {
+    pub fn new(name: String, note: i32, lastViewed: DateTime<Utc>, imgPath: String, sites: Vec<String>) -> Self {
         Self {
             name,
             note,
@@ -18,10 +17,10 @@ impl Favorite {
             sites,
         }
     }
-    pub fn setSites(&mut self, sites: Vec<Site>) {
+    pub fn setSites(&mut self, sites: Vec<String>) {
         self.sites = sites;
     }
-    pub fn getSites(&self) -> Vec<Site> {
+    pub fn getSites(&self) -> Vec<String> {
         self.sites.clone()
     }
 

@@ -1,5 +1,4 @@
 pub use crate::api::Api;
-pub use crate::api::{Page, Site};
 
 //TODO: Profile or import
 pub type Profile = String;
@@ -8,7 +7,7 @@ type SourceUrl = String;
 #[derive(Debug, Clone)]
 pub struct SourcesWindow {
     profile: Option<Profile>,
-    pub selected: Vec<Site>,
+    pub selected: Vec<String>,
     parent_id: Option<u32>,
     // windows: HashMap<u32, >,
 }
@@ -23,7 +22,7 @@ type Result<T> = std::result::Result<T, Box<dyn std::error::Error>>;
 //}
 
 impl SourcesWindow {
-    pub fn new(profile: Profile, selected: Vec<Site>, parent_id: u32) -> Self {
+    pub fn new(profile: Profile, selected: Vec<String>, parent_id: u32) -> Self {
         Self {
             profile: Some(profile),
             selected,
