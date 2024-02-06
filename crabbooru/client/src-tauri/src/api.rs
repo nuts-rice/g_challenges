@@ -9,7 +9,7 @@ use tauri::State;
 use crate::error::CrabbooruError;
 use crate::model::{DanbooruPost, TestbooruPost};
 
-type Result<T> = std::result::Result<T, Error>;
+type Result<T> = std::result::Result<T, CrabbooruError>;
 #[derive(Debug, Deserialize, Serialize, Clone, )]
 pub struct PageUrl {
     pub error: String,
@@ -152,7 +152,7 @@ impl<T: Api + Any> ApiBuilder<T> {
                     todo!()
                 }
             }
-            Err(e) => Err(e),
+            Err(e) => Err(CrabbooruError{message: "Failed to GET from page".to_string()})
         }
     }
 
@@ -169,11 +169,13 @@ impl<T: Api + Any> ApiBuilder<T> {
                 ("tags", tags.as_str()),
             ])
             .send()
-            .await?
+            .await
+            .or(Err(format!("Failed to GET from '{}'", &url)))
+            .unwrap()
             .json::<Vec<Post>>()
-            .await?;
+            .await;
         //JSON::Vec<I::Image>
-        Ok(response)
+        Ok(response.unwrap())
     }
 
     pub fn parse_page(&self, _page: PageUrl) -> ParsedPage {
@@ -275,6 +277,11 @@ pub fn get_headers() -> HeaderMap {
 pub struct DanbooruClient {
     pub inner: ApiBuilder<Self> 
 }
+
+#[tauri::command]
+pub async fn danbooru_call(query: &str, limit: &str, headers: HeaderMap) -> Result<Vec<DanbooruPost>> {
+unimplemented!()
+}
 impl From<ApiBuilder<Self>> for DanbooruClient {
     fn from(builder: ApiBuilder<Self>) -> Self {
         Self{inner: builder}
@@ -317,13 +324,30 @@ impl Api for DanbooruClient {
 
         // Ok(response)
     }
-    async fn get_by_id(&self, _id: u32) -> Result<Self::Image> {
-        unimplemented!()
+    async fn get_by_id(&self, id: u32) -> Result<Self::Image> {
+        let builder = &self.inner;
+        let url = builder.url.as_str();
+        let response = builder
+            .client
+            .get(format!("{url}/posts/{id}.json"))
+            .headers(get_headers())
+            .send()
+            .await
+            .or(Err(format!("Failed to GET from '{}'", &id)))
+            .unwrap()
+            .json::<DanbooruPost>()
+            .await;
+        Ok(response.unwrap())
+
     }
 }
 
 pub struct TestbooruClient {
     pub inner: ApiBuilder<Self> 
+}
+#[tauri::command]
+pub async fn testbooru_call(query: &str, limit: &str, headers: HeaderMap) -> Result<Vec<TestbooruPost>> {
+    unimplemented!()
 }
 impl From<ApiBuilder<Self>> for TestbooruClient {
     fn from(builder: ApiBuilder<Self>) -> Self {
@@ -358,8 +382,8 @@ impl Api for TestbooruClient {
                                                                                                             "limit", builder.limit.to_string().as_str(),
                                                                                                             "tags", &tag_string,
                                                                                                                                                                                                                     
-        ]).send().await.or(Err(format!("Failed to GET from '{}'", &url))).unwrap().json::<Vec<TestbooruPost>>().await?;
-        Ok(response)
+        ]).send().await.or(Err(format!("Failed to GET from '{}'", &url))).unwrap().json::<Vec<TestbooruPost>>().await;
+        Ok(response.unwrap())
 
 
         // let builder = &self.inner;
@@ -381,7 +405,13 @@ impl Api for TestbooruClient {
         // Ok(response)
     }
    async fn get_by_id(&self, id: u32) -> Result<Self::Image> {
-       todo!()
+    let builder = &self.inner;
+    let url = builder.url.as_str();
+    let user_agent = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/58.0.3029.110 Safari/537.3";
+    let response = builder.client.get(format!("{url}/posts/{id}.json")).header(USER_AGENT, user_agent).send().await.or(Err(format!("Failed to GET from '{}'", &id))).unwrap().json::<TestbooruPost>().await;
+    Ok(response.unwrap())
+
+    
         // let builder = &self.inner;
         // let tag_string = builder.tags.join(" ");
         // let url = builder.url.as_str();

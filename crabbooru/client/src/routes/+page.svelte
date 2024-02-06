@@ -2,6 +2,8 @@
   import SourcesWindow from './SourcesWindow.svelte';
   import MainWindow from './MainWindow.svelte';
   import Table from '../components/Table/table.svelte';
+
+
 </script>
 <head>
 <title> CrabbooruUi </title>
