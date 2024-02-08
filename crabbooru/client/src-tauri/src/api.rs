@@ -346,8 +346,11 @@ pub struct TestbooruClient {
     pub inner: ApiBuilder<Self> 
 }
 #[tauri::command]
-pub async fn testbooru_call(query: &str, limit: &str, headers: HeaderMap) -> Result<Vec<TestbooruPost>> {
-    unimplemented!()
+pub async fn testbooru_call(query: &str, limit: &str, ) -> Result<Vec<TestbooruPost>> {
+    let user_agent = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/58.0.3029.110 Safari/537.3";
+    let url = format!("https://testbooru.donmai.us/posts.json?limit={limit}&tags={query}");
+    let response = reqwest::Client::new().get(url).header(USER_AGENT, user_agent).send().await.unwrap().json::<Vec<TestbooruPost>>().await.unwrap();
+    Ok(response)
 }
 impl From<ApiBuilder<Self>> for TestbooruClient {
     fn from(builder: ApiBuilder<Self>) -> Self {

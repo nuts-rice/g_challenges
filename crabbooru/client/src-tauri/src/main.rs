@@ -160,6 +160,7 @@ fn main() {
         .manage(DanbooruClient{inner: Default::default()})
     .invoke_handler(tauri::generate_handler![
                     simple_download,
+                    testbooru_call,
                     // connect_api_cmd,
             // get_source,
         // get_images_cmd

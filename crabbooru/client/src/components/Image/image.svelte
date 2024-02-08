@@ -1,6 +1,6 @@
 <script lang="ts">
-import getDanbooruImage from '../../api/image_api.svelte';    
-import getTestbooruImage from '../../api/image_api.svelte';
+import {getDanbooruImage} from '../../api/image_api';    
+import {getTestbooruImage} from '../../api/image_api';
 
 const onSubmit = async () => {
 //const data = await getTestbooruImage(id);
