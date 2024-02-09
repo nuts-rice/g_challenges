@@ -12,9 +12,13 @@ import SvelteTable from 'svelte-table';
     import currentPage from "./image-grid.svelte";
     import perPage from "./image-grid.svelte";
     import Cell from "./cell.svelte";
+    import type {DanbooruItem} from '../../api/image_api';
+
     import type {TestbooruItem} from '../../api/image_api';
     import {getTestbooruCall} from '../../api/image_api';
-    import {getTestbooruImage} from '../../api/image_api';
+
+    import {getDanbooruCall} from '../../api/image_api';
+    import {getDanbooruImage} from '../../api/image_api';
   import { Image } from '@unpic/svelte';
 
     export let columnCount = "4";
@@ -23,9 +27,13 @@ import SvelteTable from 'svelte-table';
     export let border = "";
     export let placeholderImgs = "false";
     let placeHolderItemCount = 10;
-    export const test_item = writable<Image>(); 
+//    export const test_item = writable<Image>(); 
     export let id = "5942";    
-    export const item = writable<TestbooruItem>();
+    export let tags : string[] = [];
+    tags = ["touhou", "reimu_hakurei"];
+    export const test_item = writable<TestbooruItem>();
+    export const dan_item = writable<DanbooruItem>();
+
 
     // setContext('items', items);
 //    export const paginatedItems = derived([items, currentPage, perPage], ([$items, $currentPage, $perPage]) => {
@@ -42,7 +50,12 @@ import SvelteTable from 'svelte-table';
     // })
      onMount(async () => {
 
-        let item = await getTestbooruImage(id, );
+        let test_item = await getTestbooruCall(tags,2, "20" )
+        let dan_item = await getDanbooruCall(tags,2, "20" )
+
+        console.log("svelte: onmount: test_call: " + test_item);
+        console.log("svelte: onmount: dan_call: " + dan_item);
+
         }
         
 
@@ -50,18 +63,17 @@ import SvelteTable from 'svelte-table';
 
     </script>
 
-<!-- <button on:click={console.log("api call: ")}> Load demo images</button> -->
+<!-- <button on:click={getTestbooruImage}> Load demo images</button> -->
 <!-- <ImageApi bind:this={api_call}/> -->
     <ImageGrid columns={columnCount} rows={rowCount} {border}>
         <!-- {#each $item as img_item (img_item)} -->
        <div> 
             <!-- <Cell placeholder= ...  -->
-            {item} 
+            Test image lol            
+            {test_item} 
             <!--  /> -->
         </div>
         <div>
-            Test image lol            
-            <img src = "localhost:testimg.jpg" alt="placeholder" />
         <slot/>
         <!-- {/each} -->
         </ImageGrid>

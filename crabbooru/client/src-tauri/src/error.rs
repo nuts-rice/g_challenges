@@ -1,6 +1,6 @@
 use std::fmt;
-use serde::Serialize;
-#[derive(Clone, Debug, Serialize)]
+use serde::{Deserialize, Serialize};
+#[derive(Clone, Debug, Deserialize, Serialize)]
 pub struct CrabbooruError {
     pub message: String,
 }

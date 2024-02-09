@@ -5,9 +5,12 @@ use reqwest::{header, header::{HeaderMap,USER_AGENT}, Error, };
 use serde::{Deserialize, Serialize};
 use std::{any::Any, collections::HashMap};
 use tauri::State;
-
+use url::Url;
 use crate::error::CrabbooruError;
 use crate::model::{DanbooruPost, TestbooruPost};
+const TEST_URL: &'static str = "https://testbooru.donmai.us";
+const DANBOORU_URL: &'static str = "https://danbooru.donmai.us";
+pub const USR_USER_AGENT: &str = ("Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/58.0.3029.110 Safari/537.3");
 
 type Result<T> = std::result::Result<T, CrabbooruError>;
 #[derive(Debug, Deserialize, Serialize, Clone, )]
@@ -269,7 +272,7 @@ impl<T: Api + Any> ApiBuilder<T> {
 pub fn get_headers() -> HeaderMap {
     let mut headers = header::HeaderMap::new();
     headers.insert(
-        header::USER_AGENT,
+        reqwest::header::USER_AGENT,
         header::HeaderValue::from_static("PostmanRuntime/7.30.0"),
     );
     headers
@@ -279,9 +282,19 @@ pub struct DanbooruClient {
 }
 
 #[tauri::command]
-pub async fn danbooru_call(query: &str, limit: &str, headers: HeaderMap) -> Result<Vec<DanbooruPost>> {
-unimplemented!()
+pub async fn danbooru_call(tags: Vec<String>, page: u32, limit: &str, ) -> Result<Vec<DanbooruPost>> {
+    let url = format!("{DANBOORU_URL}/posts.json");
+    let _tags = tags.join(" ");
+    println!("Danbooru Tags: {}", &_tags);
+    println!("Danbooru URL: {}", &url);
+    let query = reqwest::Client::new().get(url).headers(get_headers()).query(&[("limit", limit.to_string().as_str()),("page", page.to_string().as_str()),( "tags", &_tags)]);
+println!("Danbooru Query: {:?}", query);
+let response = query.send().await.unwrap().json::<Vec<DanbooruPost>>().await.unwrap();
+    
+
+    Ok(response)
 }
+
 impl From<ApiBuilder<Self>> for DanbooruClient {
     fn from(builder: ApiBuilder<Self>) -> Self {
         Self{inner: builder}
@@ -346,12 +359,34 @@ pub struct TestbooruClient {
     pub inner: ApiBuilder<Self> 
 }
 #[tauri::command]
-pub async fn testbooru_call(query: &str, limit: &str, ) -> Result<Vec<TestbooruPost>> {
-    let user_agent = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/58.0.3029.110 Safari/537.3";
-    let url = format!("https://testbooru.donmai.us/posts.json?limit={limit}&tags={query}");
-    let response = reqwest::Client::new().get(url).header(USER_AGENT, user_agent).send().await.unwrap().json::<Vec<TestbooruPost>>().await.unwrap();
+pub async fn testbooru_call(tags: Vec<String>, page: u32, limit: &str, ) -> 
+//Result<Vec<TestbooruPost>> 
+Result<Vec<TestbooruPost>>{
+    let url = format!("{TEST_URL}/posts.json");
+    let _tags = tags.join(" ");
+    println!("Test Tags: {}", &_tags);
+    println!("Test URL: {}", &url);
+    let query = reqwest::Client::new().get(url).query(&[("limit", limit.to_string().as_str()),("page", page.to_string().as_str()), ("tags", &_tags)]);
+println!("Test Query: {:?}", query);
+let response = query.send().await.unwrap().json::<Vec<TestbooruPost>>().await.unwrap();
+
     Ok(response)
+    // let response = reqwest::Client::new().get(url).query(&["limit", limit, "tags", query]).send().await.unwrap();
+    
+    // match response.status() {
+    //     reqwest::StatusCode::OK => {
+    //             let parsed = response.json::<Vec<TestbooruPost>>().await.unwrap();
+                
+    //         return Ok(parsed)
+    //     },
+    //     _ =>{
+    //     let parsed: CrabbooruError = response.json().await.unwrap();
+    //     return Err(parsed)
+    //     }
+
+    // }
 }
+
 impl From<ApiBuilder<Self>> for TestbooruClient {
     fn from(builder: ApiBuilder<Self>) -> Self {
         Self{inner: builder}

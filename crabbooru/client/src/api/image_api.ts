@@ -16,7 +16,7 @@
     }
 
 
-    interface DanbooruItem {
+   export interface DanbooruItem {
         desc: string;
         img: Image;
     }
@@ -65,16 +65,23 @@
     export const getDanbooruImages = async (id: String) => {};
 
     export const getTestbooruImages = async (id: String) => {};
-
-   export async function getTestbooruCall (_query: string, limit: string) : Promise<any>{
-   
-    try {
-      const response = await invoke ('testbooru_call', {query: _query,  limit: parseInt(limit) });
-      console.log(response);
-      return response;
-      }catch(error) {
-      console.log(error);
+    export const getDanbooruCall = async (_tags: string[], _page: number, _limit: string) => {
+      const response = await invoke<DanbooruResponse>('danbooru_call', {tags: _tags, page: _page,  limit: _limit }).catch((error) => console.error(error))
+  return response?.item_list;
     };
-}
+
+   export const getTestbooruCall = async (_tags: string[], _page: number, _limit: string) => {
+   
+    // try {
+      const response = await invoke<TestbooruResponse>('testbooru_call', {tags: _tags, page: _page,  limit: _limit }).catch((error) => console.error(error))
+  return response?.item_list;
+        // if (response. && response.data && r<ScrollWheelUp>esponse.data.status_code === 200)
+
+      // console.log(response);
+        // return response;
+    };
+    
+    
+
 
 

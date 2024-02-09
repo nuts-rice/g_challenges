@@ -2,6 +2,8 @@
 use tauri::{CustomMenuItem, Menu, MenuItem, Submenu, State, Manager, };
 use tracing::{info, debug};
 use std::collections::HashMap;
+use std::cell::RefCell;
+use std::sync::RwLock;
 use reqwest::header::USER_AGENT;
 use url::Url;
 pub mod api;
@@ -15,6 +17,19 @@ pub use model::*;
 
 pub use viewer::*;
 // pub type Result<T> = std::result::Result<T, Box<dyn std::error::Error>>;
+#[derive (PartialEq)]
+pub enum Site {
+    Danbooru,
+    Gelbooru,
+    Sankaku,
+    Yandere,
+    Konachan,
+    E621,
+    Rule34,
+    Safebooru,
+    Testbooru,
+    Custom,
+}
 
 
 // use session_types::*;
@@ -46,9 +61,10 @@ fn fetch_profile(profile: String) {
 
 #[tauri::command]
 async fn simple_download(url: String) -> Result<(), CrabbooruError> {
-    let user_agent = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/58.0.3029.110 Safari/537.3";
+    //TODO: let user_agent be set by the user
+    // let user_agent = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/58.0.3029.110 Safari/537.3";
     let client = reqwest::Client::new();
-    let response = client.get(&url).header(USER_AGENT, user_agent).send().await.or(Err(format!("Failed to GET from '{}'", &url))).unwrap();
+    let response = client.get(&url).header( USER_AGENT, USR_USER_AGENT).send().await.or(Err(format!("Failed to GET from '{}'", &url))).unwrap();
     let source_size = response.content_length().unwrap();
     println!("source_size: {}", source_size);
     println!("response: {:?}", response);
@@ -59,9 +75,8 @@ async fn simple_download(url: String) -> Result<(), CrabbooruError> {
 }
 #[tauri::command]
 async fn simple_download_id(id: u32) -> Result<(), CrabbooruError> {
-    let user_agent = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/58.0.3029.110 Safari/537.3";
     let client = reqwest::Client::new();
-    let response = client.get(format!("https://testbooru.donmai.us/posts/{}", &id)).header(USER_AGENT, user_agent).send().await.or(Err(format!("Failed to GET from '{}'", &id))).unwrap();
+    let response = client.get(format!("https://testbooru.donmai.us/posts/{}", &id)).header(USER_AGENT, USR_USER_AGENT).send().await.or(Err(format!("Failed to GET from '{}'", &id))).unwrap();
     let source_size = response.content_length().unwrap();
     println!("source_size: {}", source_size);
     println!("response: {:?}", response);
@@ -156,11 +171,11 @@ fn main() {
         .add_submenu(view_submenu);
     
     tauri::Builder::default()
-        .manage(TestbooruClient{inner: Default::default()})
-        .manage(DanbooruClient{inner: Default::default()})
+        // .manage(TestbooruClient{inner: Default::default()})
+        // .manage(DanbooruClient{inner: Default::default()})
     .invoke_handler(tauri::generate_handler![
-                    simple_download,
                     testbooru_call,
+                    danbooru_call,
                     // connect_api_cmd,
             // get_source,
         // get_images_cmd
