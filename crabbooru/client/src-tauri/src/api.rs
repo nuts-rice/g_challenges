@@ -5,6 +5,7 @@ use reqwest::{header, header::{HeaderMap,USER_AGENT}, Error, };
 use serde::{Deserialize, Serialize};
 use std::{any::Any, collections::HashMap};
 use tauri::State;
+use tracing::{debug, info};
 use url::Url;
 use crate::error::CrabbooruError;
 use crate::model::{DanbooruPost, TestbooruPost};
@@ -285,10 +286,10 @@ pub struct DanbooruClient {
 pub async fn danbooru_call(tags: Vec<String>, page: u32, limit: &str, ) -> Result<Vec<DanbooruPost>> {
     let url = format!("{DANBOORU_URL}/posts.json");
     let _tags = tags.join(" ");
-    println!("Danbooru Tags: {}", &_tags);
-    println!("Danbooru URL: {}", &url);
+    info!("Danbooru Tags: {}", &_tags);
+    info!("Danbooru URL: {}", &url);
     let query = reqwest::Client::new().get(url).headers(get_headers()).query(&[("limit", limit.to_string().as_str()),("page", page.to_string().as_str()),( "tags", &_tags)]);
-println!("Danbooru Query: {:?}", query);
+info!("Danbooru Query: {:?}", query);
 let response = query.send().await.unwrap().json::<Vec<DanbooruPost>>().await.unwrap();
     
 
@@ -364,10 +365,10 @@ pub async fn testbooru_call(tags: Vec<String>, page: u32, limit: &str, ) ->
 Result<Vec<TestbooruPost>>{
     let url = format!("{TEST_URL}/posts.json");
     let _tags = tags.join(" ");
-    println!("Test Tags: {}", &_tags);
-    println!("Test URL: {}", &url);
+    info!("Test Tags: {}", &_tags);
+    info!("Test URL: {}", &url);
     let query = reqwest::Client::new().get(url).query(&[("limit", limit.to_string().as_str()),("page", page.to_string().as_str()), ("tags", &_tags)]);
-println!("Test Query: {:?}", query);
+    info!("Test Query: {:?}", query);
 let response = query.send().await.unwrap().json::<Vec<TestbooruPost>>().await.unwrap();
 
     Ok(response)

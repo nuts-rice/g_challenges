@@ -141,7 +141,7 @@ fn main_window() {
 }
 
 fn main() {
-//    tracing_subscriber::fmt().init();
+    tracing_subscriber::fmt().init();
     // let _sites: Vec<Site> = Vec::new();
     let _profile = "default".to_string();
     // tracing_subscriber::fmt::init();
@@ -151,7 +151,7 @@ fn main() {
     //     viewer::SourcesWindow::sources_window(&mut sources, &egui::Context::default());
     let sources_config = CustomMenuItem::new("Config Sources".to_string(), "Sources Config");
     let sources_submenu = Submenu::new("Sources", Menu::new().add_item(sources_config));
-    let new_tab = CustomMenuItem::new("new_tab".to_string(), "New Tab");
+    let  new_tab = CustomMenuItem::new("new_tab".to_string(), "New Tab");
     let close_tab = CustomMenuItem::new("close_tab".to_string(), "Close Tab");
     let quit = CustomMenuItem::new("quit".to_string(), "Quit");
     let close = CustomMenuItem::new("close".to_string(), "Close");
