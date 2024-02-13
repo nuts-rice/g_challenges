@@ -8,4 +8,5 @@ pub mod favorite;
 pub use favorite::*;
 pub mod testbooru;
 pub use testbooru::*;
-
+pub mod safebooru;
+pub use safebooru::*;

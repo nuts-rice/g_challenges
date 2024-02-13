@@ -16,6 +16,9 @@ import SvelteTable from 'svelte-table';
 
     import type {TestbooruItem} from '../../api/image_api';
     import {getTestbooruCall} from '../../api/image_api';
+import {getTestbooruCallId} from '../../api/image_api';
+    
+
 
     import {getDanbooruCall} from '../../api/image_api';
     import {getDanbooruImage} from '../../api/image_api';
@@ -51,9 +54,13 @@ import SvelteTable from 'svelte-table';
      onMount(async () => {
 
         let test_items = await getTestbooruCall(tags,2, 20 )
+        let test_item = await getTestbooruCallId(parseInt(id))
+  
         // let dan_items = await getDanbooruCall(tags,2, "20" )
 
         console.log("svelte: onmount: test_call: " + test_items);
+        console.log("svelte: onmount: test_call_id: " + test_item);
+
         console.log("svelte: onmount: dan_call: " + dan_items);
 
         }

@@ -80,7 +80,7 @@
     export const getDanbooruImages = async (id: String) => {};
 
     export const getTestbooruImages = async (id: String) => {};
-    export const getTestbooruCallId = async (id: string) => {
+    export const getTestbooruCallId = async (id: number) => {
         const response = await invoke<SingleTestbooruResponse>('testbooru_call_id', {id: id}).catch((error) => console.error(error))
         return response?.item_list[0];
     }

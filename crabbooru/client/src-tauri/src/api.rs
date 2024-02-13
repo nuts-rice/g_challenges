@@ -8,7 +8,7 @@ use tauri::State;
 use tracing::{debug, info};
 use url::Url;
 use crate::error::CrabbooruError;
-use crate::model::{DanbooruPost, TestbooruPost};
+use crate::model::{DanbooruPost, TestbooruPost, SafebooruPost};
 const TEST_URL: &'static str = "https://testbooru.donmai.us";
 const DANBOORU_URL: &'static str = "https://danbooru.donmai.us";
 pub const USR_USER_AGENT: &str = ("Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/58.0.3029.110 Safari/537.3");
@@ -37,10 +37,11 @@ pub trait ApiClient {
     type Post;
     const URL: &'static str;
     const SORT: &'static str;
-    async fn booru_call(&self) -> Result<Vec<Self::Post>>;
+    async fn booru_call(&self, tags: Vec<String>, limit: u32, page: u32) -> Result<Vec<Self::Post>>;
     async fn booru_call_id(&self, id: u32) -> Result<Self::Post>;
 
 }
+
     // ctx: PooledContext,
     // pub testbooru: TestbooruClient,
     // pub danbooru: DanbooruClient,
@@ -391,7 +392,7 @@ info!("Test Response: {:?}", response);
 #[tauri::command]
 pub async fn testbooru_call_id(id:u32) -> Result<TestbooruPost> {
     let url = format!("{TEST_URL}/posts/{id}.json");
-    let res = reqwest::Client::new().get(url).send().await.unwrap().json::<TestbooruPost>().await.unwrap();
+    let res = reqwest::Client::new().get(url).headers(get_headers()).send().await.unwrap().json::<TestbooruPost>().await.unwrap();
     info! ("testbooru_call_id query: {:?}", res);
     Ok(res)
 }
@@ -500,23 +501,39 @@ pub struct SafebooruClient {
 }
 #[async_trait]
 impl ApiClient for SafebooruClient {
+    type Post = SafebooruPost;
+    const URL: &'static str = "https://safebooru.donmai.us";
+    const SORT: &'static str = "sort:";
 
-    #[tauri::command]
-    async fn booru_call(tags: Vec<String>, page: u32, limit: u32, ) -> Result<Vec<TestbooruPost>> {
-        let url = format!("{TEST_URL}/posts.json");
+    async fn booru_call_id(&self, id: u32, ) -> Result<SafebooruPost> {
+                todo!()
+
+    }
+
+
+    async fn booru_call(&self, tags: Vec<String>, page: u32, limit: u32, ) -> Result<Vec<SafebooruPost>> {
+        let _url = Self::URL;
+        let url = format!("{_url}/index.php");
         let _tags = tags.join(" ");
-        info!("Test Tags: {}", &_tags);
-        info!("Test URL: {}", &url);
-        let query = reqwest::Client::new()
+        info!("SafeBooru Tags: {}", &_tags);
+        info!("SafeBooru URL: {}", &url);
+        let query = self.inner
         .get(url)
         .headers(get_headers())
         .query(&[
+            ("page", "dapi"),
+            ("s", "post"),
+            ("q", "index"),
+            ("pid", page.to_string().as_str()),
             ("limit", limit.to_string().as_str()),
-            ("page", page.to_string().as_str()),
             ("tags", &_tags),
+            ("json", "1"),
             ]);
-        info!("Test Query: {:?}", query);
+        info!("Safe Query: {:?}", query);
+        let response = query.send().await.unwrap().json::<Vec<SafebooruPost>>().await.unwrap();
+        Ok(response)
 }
+
 }
 #[cfg(test)]
 mod test {
