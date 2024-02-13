@@ -175,6 +175,7 @@ fn main() {
         // .manage(DanbooruClient{inner: Default::default()})
     .invoke_handler(tauri::generate_handler![
                     testbooru_call,
+                    testbooru_call_id,
                     danbooru_call,
                     // connect_api_cmd,
             // get_source,

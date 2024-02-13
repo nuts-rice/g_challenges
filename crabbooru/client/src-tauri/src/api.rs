@@ -32,7 +32,15 @@ pub struct ParsedPage {
     url: String,
     headers: HashMap<String, String>,
 }
-pub struct ApiClient {}
+#[async_trait]
+pub trait ApiClient {
+    type Post;
+    const URL: &'static str;
+    const SORT: &'static str;
+    async fn booru_call(&self) -> Result<Vec<Self::Post>>;
+    async fn booru_call_id(&self, id: u32) -> Result<Self::Post>;
+
+}
     // ctx: PooledContext,
     // pub testbooru: TestbooruClient,
     // pub danbooru: DanbooruClient,
@@ -156,9 +164,9 @@ impl<T: Api + Any> ApiBuilder<T> {
                     todo!()
                 }
             }
-            Err(e) => Err(CrabbooruError{message: "Failed to GET from page".to_string()})
+            Err(e) => Err(CrabbooruError{message: "failed to get page".to_string()}),}
         }
-    }
+    
 
 
     pub async fn get_image(&self, page: PageUrl) -> Result<Vec<Post>> {
@@ -283,7 +291,7 @@ pub struct DanbooruClient {
 }
 
 #[tauri::command]
-pub async fn danbooru_call(tags: Vec<String>, page: u32, limit: &str, ) -> Result<Vec<DanbooruPost>> {
+pub async fn danbooru_call(tags: Vec<String>, page: u32, limit: u32, ) -> Result<Vec<DanbooruPost>> {
     let url = format!("{DANBOORU_URL}/posts.json");
     let _tags = tags.join(" ");
     info!("Danbooru Tags: {}", &_tags);
@@ -360,18 +368,34 @@ pub struct TestbooruClient {
     pub inner: ApiBuilder<Self> 
 }
 #[tauri::command]
-pub async fn testbooru_call(tags: Vec<String>, page: u32, limit: &str, ) -> 
+pub async fn testbooru_call(tags: Vec<String>, page: u32, limit: u32, ) -> 
 //Result<Vec<TestbooruPost>> 
 Result<Vec<TestbooruPost>>{
     let url = format!("{TEST_URL}/posts.json");
     let _tags = tags.join(" ");
     info!("Test Tags: {}", &_tags);
     info!("Test URL: {}", &url);
-    let query = reqwest::Client::new().get(url).query(&[("limit", limit.to_string().as_str()),("page", page.to_string().as_str()), ("tags", &_tags)]);
+    let query = reqwest::Client::new()
+    .get(url)
+    .headers(get_headers())
+    .query(&[
+        ("limit", limit.to_string().as_str()),
+        ("page", page.to_string().as_str()),
+        ("tags", &_tags),
+        ]);
     info!("Test Query: {:?}", query);
 let response = query.send().await.unwrap().json::<Vec<TestbooruPost>>().await.unwrap();
-
+info!("Test Response: {:?}", response);
     Ok(response)
+}
+#[tauri::command]
+pub async fn testbooru_call_id(id:u32) -> Result<TestbooruPost> {
+    let url = format!("{TEST_URL}/posts/{id}.json");
+    let res = reqwest::Client::new().get(url).send().await.unwrap().json::<TestbooruPost>().await.unwrap();
+    info! ("testbooru_call_id query: {:?}", res);
+    Ok(res)
+}
+
     // let response = reqwest::Client::new().get(url).query(&["limit", limit, "tags", query]).send().await.unwrap();
     
     // match response.status() {
@@ -386,7 +410,7 @@ let response = query.send().await.unwrap().json::<Vec<TestbooruPost>>().await.un
     //     }
 
     // }
-}
+
 
 impl From<ApiBuilder<Self>> for TestbooruClient {
     fn from(builder: ApiBuilder<Self>) -> Self {
@@ -471,6 +495,29 @@ impl Api for TestbooruClient {
     }
 }
 
+pub struct SafebooruClient {
+    pub inner: reqwest::Client,
+}
+#[async_trait]
+impl ApiClient for SafebooruClient {
+
+    #[tauri::command]
+    async fn booru_call(tags: Vec<String>, page: u32, limit: u32, ) -> Result<Vec<TestbooruPost>> {
+        let url = format!("{TEST_URL}/posts.json");
+        let _tags = tags.join(" ");
+        info!("Test Tags: {}", &_tags);
+        info!("Test URL: {}", &url);
+        let query = reqwest::Client::new()
+        .get(url)
+        .headers(get_headers())
+        .query(&[
+            ("limit", limit.to_string().as_str()),
+            ("page", page.to_string().as_str()),
+            ("tags", &_tags),
+            ]);
+        info!("Test Query: {:?}", query);
+}
+}
 #[cfg(test)]
 mod test {
     use super::*;

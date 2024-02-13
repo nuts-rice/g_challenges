@@ -31,8 +31,8 @@ import SvelteTable from 'svelte-table';
     export let id = "5942";    
     export let tags : string[] = [];
     tags = ["touhou", "reimu_hakurei"];
-    export const test_item = writable<TestbooruItem>();
-    export const dan_item = writable<DanbooruItem>();
+    export const test_items = writable<TestbooruItem[]>();
+    export const dan_items = writable<DanbooruItem[]>();
 
 
     // setContext('items', items);
@@ -50,11 +50,11 @@ import SvelteTable from 'svelte-table';
     // })
      onMount(async () => {
 
-        let test_item = await getTestbooruCall(tags,2, "20" )
-        let dan_item = await getDanbooruCall(tags,2, "20" )
+        let test_items = await getTestbooruCall(tags,2, 20 )
+        // let dan_items = await getDanbooruCall(tags,2, "20" )
 
-        console.log("svelte: onmount: test_call: " + test_item);
-        console.log("svelte: onmount: dan_call: " + dan_item);
+        console.log("svelte: onmount: test_call: " + test_items);
+        console.log("svelte: onmount: dan_call: " + dan_items);
 
         }
         
@@ -66,14 +66,18 @@ import SvelteTable from 'svelte-table';
 <!-- <button on:click={getTestbooruImage}> Load demo images</button> -->
 <!-- <ImageApi bind:this={api_call}/> -->
     <ImageGrid columns={columnCount} rows={rowCount} {border}>
-        <!-- {#each $item as img_item (img_item)} -->
+        <!-- {#each $test_items as test_img, i} -->
        <div> 
             <!-- <Cell placeholder= ...  -->
             Test image lol            
-            {test_item} 
+            {test_items} 
             <!--  /> -->
         </div>
-        <div>
+        <!-- <div></div>
+            Dan image lol
+            
+        {dan_items}
+         -->
         <slot/>
         <!-- {/each} -->
         </ImageGrid>
