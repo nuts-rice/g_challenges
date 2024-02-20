@@ -1,12 +1,11 @@
-use std::io::{self, Read};
 use std::fs::File;
+use std::io::{self, Read};
 
 struct TagRecord {
     name: String,
     tag_type: String,
     post_count: i32,
     aliases: Vec<String>,
-    
 }
 
 pub fn read_file(filename: &str) -> Result<String, io::Error> {
@@ -16,16 +15,14 @@ pub fn read_file(filename: &str) -> Result<String, io::Error> {
     Ok(contents)
 }
 pub fn read_CSV(filename: &str) -> Result<Vec<Vec<String>>, csv::Error> {
-      let mut reader = csv::Reader::from_path(filename)?;
-      let mut records: Vec<Vec<String>> = Vec::new();
-      for result in reader.records() {
-          let record = result?;
+    let mut reader = csv::Reader::from_path(filename)?;
+    let mut records: Vec<Vec<String>> = Vec::new();
+    for result in reader.records() {
+        let record = result?;
         records.push(record.deserialize(None).unwrap());
-              
-      }
-      Ok(records)
+    }
+    Ok(records)
 }
-
 
 pub fn parse_tags(tags: Vec<Vec<String>>) -> Vec<TagRecord> {
     let mut tag_records: Vec<TagRecord> = Vec::new();

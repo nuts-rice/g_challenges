@@ -203,7 +203,10 @@ fn main() {
     tracing_subscriber::fmt().init();
     // let _sites: Vec<Site> = Vec::new();
     let _profile = "default".to_string();
-    let tags_autoload = autocomplete_tag_helper("../tags/danbooru.csv");
+    let now_tags_load = std::time::Instant::now();
+    autocomplete_tag_helper("../tags/danbooru.csv");
+    let elapsed_tags_load = now_tags_load.elapsed();
+    info!("tags loading elapsed: {:?}", elapsed_tags_load);
     // tracing_subscriber::fmt::init();
     // let mut sources =
     //     viewer::SourcesWindow::new(profile, sites, egui_winit::winit::window::WindowId::from(0));
@@ -236,8 +239,8 @@ fn main() {
         .add_submenu(sources_submenu)
         .add_submenu(tools_submenu)
         .add_submenu(view_submenu);
-
     tauri::Builder::default()
+        
         .manage(PreviewImgUrls.clone())
         // .manage(TestbooruClient{inner: Default::default()})
         // .manage(DanbooruClient{inner: Default::default()})
@@ -255,9 +258,9 @@ fn main() {
             // get_source,
             // get_images_cmd
         ])
+
         .setup(|app| {
             let _preview_img_urls: Vec<String> = Vec::new();
-
             let window = tauri::WindowBuilder::new(
                 app,
                 "main",
@@ -269,6 +272,7 @@ fn main() {
             let app_handle = app.handle();
             let _boxed_app_handle = Box::new(app_handle);
             let _window = window.clone();
+
             // window.on_menu_event(move |event| {
             //     "quit" => {
             //         std::process::exit(0);
@@ -279,5 +283,6 @@ fn main() {
             Ok(())
         })
         .run(tauri::generate_context!())
+
         .expect("error while running tauri application");
 }
