@@ -44,18 +44,17 @@ pub struct DanbooruPost {
     pub is_flagged: bool,
     pub is_pending: bool,
     pub bit_flags: u32,
-
 }
 #[derive(Serialize, Deserialize, Debug, Clone)]
 pub enum DanbooruRating {
     #[serde(rename = "g")]
     General,
-    #[serde(rename = "q")]  
+    #[serde(rename = "q")]
     Questionable,
-    #[serde(rename = "e")]  
+    #[serde(rename = "e")]
     Explicit,
     #[serde(rename = "s")]
-    Sensitive
+    Sensitive,
 }
 impl From<DanbooruRating> for String {
     fn from(rating: DanbooruRating) -> String {
@@ -65,15 +64,14 @@ impl From<DanbooruRating> for String {
 
 impl std::fmt::Display for DanbooruRating {
     fn fmt(&self, f: &mut std::fmt::Formatter) -> std::fmt::Result {
-        let lower_case = format!("{:?}" , self).to_lowercase();
+        let lower_case = format!("{:?}", self).to_lowercase();
         write!(f, "DanbooruRating: {}", lower_case)
     }
 }
 
 impl std::fmt::Display for DanbooruPost {
     fn fmt(&self, f: &mut std::fmt::Formatter) -> std::fmt::Result {
-        let lower_case = format!("{:?}" , self).to_lowercase();
+        let _lower_case = format!("{:?}", self).to_lowercase();
         write!(f, "DanbooruPost: id={}", self.id)
     }
 }
-

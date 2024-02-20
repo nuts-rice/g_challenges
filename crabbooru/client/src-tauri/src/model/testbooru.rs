@@ -44,21 +44,19 @@ pub struct TestbooruPost {
     pub is_flagged: bool,
     pub is_pending: bool,
     pub bit_flags: u32,
-
 }
 
 #[derive(Serialize, Deserialize, Debug, Clone)]
 pub enum TestbooruRating {
     #[serde(rename = "g")]
     General,
-    #[serde(rename = "q")]  
+    #[serde(rename = "q")]
     Questionable,
-    #[serde(rename = "e")]  
+    #[serde(rename = "e")]
     Explicit,
     #[serde(rename = "s")]
-    Sensitive
+    Sensitive,
 }
-
 
 impl From<TestbooruRating> for String {
     fn from(rating: TestbooruRating) -> String {
@@ -68,13 +66,13 @@ impl From<TestbooruRating> for String {
 
 impl std::fmt::Display for TestbooruRating {
     fn fmt(&self, f: &mut std::fmt::Formatter) -> std::fmt::Result {
-        let lower_case = format!("{:?}" , self).to_lowercase();
+        let lower_case = format!("{:?}", self).to_lowercase();
         write!(f, "TestbooruRating: {}", lower_case)
     }
 }
 impl std::fmt::Display for TestbooruPost {
     fn fmt(&self, f: &mut std::fmt::Formatter) -> std::fmt::Result {
-        let lower_case = format!("{:?}" , self).to_lowercase();
+        let _lower_case = format!("{:?}", self).to_lowercase();
         write!(f, "TestbooruPost: id={}", self.id)
     }
 }

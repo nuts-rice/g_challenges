@@ -13,11 +13,14 @@ import SvelteTable from 'svelte-table';
     import perPage from "./image-grid.svelte";
     import Cell from "./cell.svelte";
     import type {DanbooruItem} from '../../api/image_api';
+    import type {SingleTestbooruResponse}from '../../api/image_api';
 
     import type {TestbooruItem} from '../../api/image_api';
+    import {getSingleTestbooruImg} from '../../api/image_api';
+    import {getTestbooruImage} from '../../api/image_api';
     import {getTestbooruCall} from '../../api/image_api';
 import {getTestbooruCallId} from '../../api/image_api';
-    
+import BooruResult from '../../api/image_api';
 
 
     import {getDanbooruCall} from '../../api/image_api';
@@ -34,8 +37,25 @@ import {getTestbooruCallId} from '../../api/image_api';
     export let id = "5942";    
     export let tags : string[] = [];
     tags = ["touhou", "reimu_hakurei"];
+    export const test_item = "";
+
     export const test_items = writable<TestbooruItem[]>();
     export const dan_items = writable<DanbooruItem[]>();
+    export let test_response = writable<TestbooruItem>();
+
+function setup(event: Event) {
+const imgInput = document.getElementById('image');
+imgInput.addEventListener('change', function(event) {
+  const target = event.target.files[0];
+  const file: File = (target.files as FileList)[0];
+  const reader = new FileReader();
+  reader.onload = (e) => {
+    const img = document.getElementById('img') as HTMLImageElement;
+    img.src = e.target.result as string;
+  };
+  reader.readAsDataURL(file);
+});
+}
 
 
     // setContext('items', items);
@@ -54,12 +74,15 @@ import {getTestbooruCallId} from '../../api/image_api';
      onMount(async () => {
 
         let test_items = await getTestbooruCall(tags,2, 20 )
-        let test_item = await getTestbooruCallId(parseInt(id))
+        let test_item = await getTestbooruCallId(parseInt(id));
+  
+        
+        
   
         // let dan_items = await getDanbooruCall(tags,2, "20" )
 
         console.log("svelte: onmount: test_call: " + test_items);
-        console.log("svelte: onmount: test_call_id: " + test_item);
+        console.log("svelte: onmount: test_img: " + test_item);
 
         console.log("svelte: onmount: dan_call: " + dan_items);
 
@@ -76,8 +99,17 @@ import {getTestbooruCallId} from '../../api/image_api';
         <!-- {#each $test_items as test_img, i} -->
        <div> 
             <!-- <Cell placeholder= ...  -->
+    <input type="file"
+    name="booru-img"
+    id="booru-img"
+    value=""  
+    >  
+    <br>  
+    <canvas id="preview"></canvas>
             Test image lol            
-            {test_items} 
+            {test_items}
+            <img src={test_item} alt="booru img" />
+        
             <!--  /> -->
         </div>
         <!-- <div></div>

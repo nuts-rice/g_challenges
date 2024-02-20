@@ -1,5 +1,5 @@
+use serde::{Deserialize};
 use std::fmt;
-use serde::{Serialize,Deserialize};
 #[derive(Debug, Clone, Deserialize)]
 pub struct SafebooruPost {
     pub id: i32,
@@ -19,7 +19,7 @@ pub enum SafebooruRating {
     Safe,
     General,
     Questionable,
-    Explicit
+    Explicit,
 }
 
 impl From<SafebooruRating> for String {
@@ -27,12 +27,10 @@ impl From<SafebooruRating> for String {
         rating.to_string()
     }
 }
-        
 
 impl fmt::Display for SafebooruRating {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
         let tag = format!("{:?}", self).to_lowercase();
         write!(f, "{tag}")
-            
     }
 }

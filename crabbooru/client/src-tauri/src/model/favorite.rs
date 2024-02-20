@@ -8,7 +8,13 @@ pub struct Favorite {
 }
 
 impl Favorite {
-    pub fn new(name: String, note: i32, lastViewed: DateTime<Utc>, imgPath: String, sites: Vec<String>) -> Self {
+    pub fn new(
+        name: String,
+        note: i32,
+        lastViewed: DateTime<Utc>,
+        imgPath: String,
+        sites: Vec<String>,
+    ) -> Self {
         Self {
             name,
             note,
@@ -30,5 +36,4 @@ impl Favorite {
     pub fn getNote(&self) -> i32 {
         self.note
     }
-
 }

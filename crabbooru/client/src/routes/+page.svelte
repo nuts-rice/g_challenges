@@ -1,7 +1,9 @@
-<script>
+<script lang="ts">
   import SourcesWindow from './SourcesWindow.svelte';
   import MainWindow from './MainWindow.svelte';
   import Table from '../components/Table/table.svelte';
+  import SearchBar from '../components/Search/searchBar.svelte';
+
 
 
 </script>
@@ -14,12 +16,17 @@
   Tags List
 
 </div>
-Tags : <input type="text" id="tags" />
-<button > Search </button>
-
+<section>
+<SearchBar/>
+</section>
+ <section>
+  Search tab
+  <search_tab />
+  </section> 
 
 <section>
 	Image gallery goes here
+  
 	<Table />
 </section>
 <style>

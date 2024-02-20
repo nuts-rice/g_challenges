@@ -1,4 +1,4 @@
-use crate::{Favorite};
+use crate::Favorite;
 
 pub struct Profile {
     pub name: String,
@@ -8,7 +8,12 @@ pub struct Profile {
 }
 
 impl Profile {
-    pub fn new(name: String, sites: Vec<String>, favorites: Vec<Favorite>, selected: usize) -> Self {
+    pub fn new(
+        name: String,
+        sites: Vec<String>,
+        favorites: Vec<Favorite>,
+        selected: usize,
+    ) -> Self {
         Self {
             name,
             sites,

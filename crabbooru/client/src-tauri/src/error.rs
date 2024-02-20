@@ -1,12 +1,12 @@
-use std::fmt;
 use serde::{Deserialize, Serialize};
+use std::fmt;
 #[derive(Clone, Debug, Deserialize, Serialize)]
 pub struct CrabbooruError {
     pub message: String,
 }
 
 impl fmt::Display for CrabbooruError {
-    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result{
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
         write!(f, "{}", self.message)
     }
 }
