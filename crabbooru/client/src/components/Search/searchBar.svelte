@@ -1,16 +1,33 @@
 <script lang="ts">
+  import { invoke } from "@tauri-apps/api/tauri";
   import { createEventDispatcher, onMount } from "svelte";
-  import { Search, ButtonSet, Button, Tag } from "carbon-components-svelte";
+  import { Dropdown, Search, ButtonSet, Button, Tag } from "carbon-components-svelte";
+  import BooruResult from "../../api/image_api"
+  import BooruSite from "../../api/image_api"
   import { readCSV } from "../../utils/file";
   //    import SearchBar from './SearchBar';
 
   let isValid = false;
   let errorMsg = "";
   export let search;
-  let searchQuery = "";
+  let selectedBooruId = 0;
+  let isDropdownOpen = false;
+  let searchQuery = [""];
   let searching = false;
   let suggestions = undefined;
   let currentSearch = undefined;
+
+  const handleBooruDropdown = () => {
+    isDropdownOpen = !isDropdownOpen;
+  };
+  const handleBooruSelect = async (id: number) => {
+    selectedBooruId = id;
+    isDropdownOpen = false;
+    console.log("selected booru id: ", selectedBooruId);
+    let booru_site: BooruSite =  selectedBooruId
+      
+      
+  };
 
   const setQuery = async (_searchQuery: string) => {
     searchQuery = _searchQuery;
@@ -22,6 +39,7 @@
       searching = false;
     }
   };
+
 
   function validateSearchQuery(input: any) {
     function onInput() {
@@ -61,9 +79,17 @@
     console.log("searchbar mounted query: ", searchQuery);
   });
 
+  function matchBooru(selected: number)  {
+  //  if 
+ //     return booru
+        
+  };
   function onInput(query: string) {
     console.log("searchQuery: ", searchQuery);
-    dispatch("clicked", searchQuery);
+    let search_result = new BooruResult (selectedBooruId, 1, searchQuery, [])
+    let tags = query.split(" ");
+//    search_result.booru_call()
+    dispatch("clicked", searchQuery.toString());
   }
 </script>
 
@@ -80,6 +106,20 @@
 {errorMsg}
 validate search query test
 <section>
+  <Dropdown bind:selectedBooruId 
+  size="sm"  
+  titleText="Booru"
+  selectedId = "0"
+  on:select={handleBooruSelect}
+  items={[
+    {id: "0", text: "Testbooru"},
+    {id: "1", text: "Safebooru"},
+    {id: "2", text: "Danbooru"},
+    ]}
+    let:item
+    let:index
+  >
+  </Dropdown>  
   <div>
     <Search bind:searchQuery />
     SearchQuery test

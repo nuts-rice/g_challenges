@@ -194,10 +194,10 @@ async fn booru_call_test(booru: BooruSite, tags: Vec<String>, page: u32, limit: 
 
 }
 
-
 pub fn autocomplete_tag_helper(file: &str) {
     let tags_data = utils::read_CSV(file).unwrap();
-    info!("tags_data preview: {:?}", tags_data[0]);
+    let parsed = utils::parse_tags(tags_data);
+    info!("tags_data preview: {:?}", parsed[0]);
 }
 fn main() {
     tracing_subscriber::fmt().init();

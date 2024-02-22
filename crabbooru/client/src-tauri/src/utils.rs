@@ -1,7 +1,8 @@
 use std::fs::File;
 use std::io::{self, Read};
 
-struct TagRecord {
+#[derive(Clone, Debug)]
+pub struct TagRecord {
     name: String,
     tag_type: String,
     post_count: i32,
@@ -37,3 +38,5 @@ pub fn parse_tags(tags: Vec<Vec<String>>) -> Vec<TagRecord> {
     }
     tag_records
 }
+
+

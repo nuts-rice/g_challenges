@@ -52,9 +52,10 @@ export interface MultipleTestbooruResponse {
 }
 
 
-enum Booru {
-  Testbooru,
-  Safebooru,
+export const BooruSite  ={
+  Testbooru: 0,
+  Safebooru : 1,
+  Danbooru: 2,
 }
 
 // export function () {
@@ -191,27 +192,27 @@ export const getSingleTestbooruImg = async (_post: TestbooruItem) => {
 };
 
 export default class BooruResult extends Array<Post> {
-public booru: Booru
+public booru_id: number
 public page: number
 public readonly tags: string[]
 public readonly posts: Post[] 
 
-constructor(booru: Booru, page: number, tags: string[], posts: Post[]) {
+constructor(booru_id: number, page: number, tags: string[], posts: Post[]) {
   super(posts.length)
   for (let i = 0; i < posts.length; i++) {
     this[i] = posts[i]
   }
-  this.booru = booru
+  this.booru_id = booru_id
   this.page = page
   this.tags = tags
   this.posts = posts
 }
-public booru_call = async (  _tags: string[],
+public booru_call = async (_tags: string[],
   _page: number,
   _limit: number
 ) => {
   try {
-  const response = await invoke<BooruResult>("booru_call_test", {tags: _tags, page: _page, limit: _limit})
+  const response = await invoke<BooruResult>("booru_call_test", {booru: this.booru_id, tags: _tags, page: _page, limit: _limit})
       // if (response.status_code == 200)
       console.log("booru_call: response: " + response);
       return response;
