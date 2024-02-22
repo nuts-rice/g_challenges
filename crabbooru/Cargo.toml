@@ -6,11 +6,16 @@ edition = "2021"
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [dependencies]
+image = "0.24.7"
 session_types = "0.3.1"
 tracing = "0.1.40"
 tracing-subscriber = { version = "0.3.18", features = ["env-filter"] }
 url = { version = "2.5.0", features = ["serde"] }
 winit = "0.29.4"
 
+[dependencies.bromine]
+version = "0.22.1"
+optional = true
+features = ["serialize_bincode", "encryption_layer"]
 # [workspace]
 # members = ["model", "client", "e2e"]

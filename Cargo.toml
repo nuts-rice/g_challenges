@@ -1,4 +1,4 @@
-workspace = { members = ["verlet", "crabbooru/client/src-tauri", "verlet_bevy", "boids_bevy"] }
+workspace = { members = ["crabbooru", "crabbooru/client/src-tauri", "crabbooru/client/src-tauri/fuzz", "verlet_bevy", "boids_bevy"] }
 [package]
 name = "g_challenges"
 version = "0.1.0"
@@ -8,7 +8,14 @@ edition = "2021"
 
 [dependencies]
 anyhow = "1.0.79"
+atomic_ref = "0.2.1"
+atomic_refcell = "0.1.13"
+bromine = "0.22.1"
 chrono = "0.4.33"
 comfy = "0.2.0"
+lazy = "0.5.3"
+once_cell = "1.19.0"
 sdl2 = "0.35.2"
 serde_json = "1.0.111"
+tauri = { version = "1.5.4", features = ["window-create", "reqwest", "reqwest-client"] }
+tokio = "1.36.0"
