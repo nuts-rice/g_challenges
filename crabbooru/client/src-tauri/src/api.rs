@@ -10,7 +10,7 @@ use serde::{Deserialize, Serialize};
 use std::{any::Any, collections::HashMap};
 
 use tauri::State;
-use tracing::{info};
+use tracing::info;
 
 const TEST_URL: &str = "https://testbooru.donmai.us";
 const DANBOORU_URL: &str = "https://danbooru.donmai.us";
@@ -47,6 +47,8 @@ pub trait ApiClient {
     async fn parse_post(&self, post: Self::Post) -> Result<String>;
     async fn parse_posts(&self, response: Vec<Self::Post>) -> Result<Vec<String>>;
     async fn view_img(&self, img: Self::Post) -> Result<()>;
+    async fn get_all_tags(&self) -> Result<Vec<String>>;
+    async fn addMd5(&self, path: &str) -> Result<()>;
 }
 
 // ctx: PooledContext,
@@ -249,11 +251,7 @@ impl<T: Api + Any> ApiBuilder<T> {
     async fn get_image_data<I: Api + Any>(&self, _image: I::Image) -> Vec<u8> {
         Vec::new()
     }
-    async fn get_image_test(
-        &self,
-        _url: String,
-        _headers: HashMap<String, String>,
-    ) -> Result<()> {
+    async fn get_image_test(&self, _url: String, _headers: HashMap<String, String>) -> Result<()> {
         todo!()
         // let user_agent = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/58.0.3029.110 Safari/537.3";
         // let client = self.client.clone();
@@ -577,7 +575,23 @@ impl ApiClient for SafebooruClient {
         }
     }
     async fn booru_call_id(&self, _id: u32) -> Result<SafebooruPost> {
-        todo!()
+        let _url = Self::URL;
+        let url = format!("{_url}/posts/{_id}.json");
+        let res = reqwest::Client::new()
+            .get(url)
+            .headers(get_headers())
+            .send()
+            .await
+            .unwrap()
+            .json::<SafebooruPost>()
+            .await
+            .unwrap();
+        info!("booru_call_id query: {:?}", res);
+        let body = format!("{:?}: {:?}\n", res.id, &res.image);
+        info!("booru_call_id body: {:?}", body);
+        let img_url = &res.image;
+        info!("booru_call_id img_url: {:?}", img_url);
+        Ok(res)
     }
     async fn booru_call(
         &self,
@@ -619,6 +633,12 @@ impl ApiClient for SafebooruClient {
     async fn view_img(&self, _img: Self::Post) -> Result<()> {
         todo!()
     }
+    async fn get_all_tags(&self) -> Result<Vec<String>> {
+        todo!()
+    }
+    async fn addMd5(&self, path: &str) -> Result<()> {
+        todo!()
+    }
 }
 
 pub struct TestBooruClient {
@@ -635,7 +655,23 @@ impl ApiClient for TestBooruClient {
         }
     }
     async fn booru_call_id(&self, _id: u32) -> Result<TestbooruPost> {
-        todo!()
+        let _url = Self::URL;
+        let url = format!("{_url}/posts/{_id}.json");
+        let res = reqwest::Client::new()
+            .get(url)
+            .headers(get_headers())
+            .send()
+            .await
+            .unwrap()
+            .json::<TestbooruPost>()
+            .await
+            .unwrap();
+        info!("booru_call_id query: {:?}", res);
+        let body = format!("{:?}: {:?}\n", res.id, &res.file_url);
+        info!("booru_call_id body: {:?}", body);
+        let img_url = &res.file_url.clone().unwrap();
+        info!("booru_call_id img_url: {:?}", img_url);
+        Ok(res)
     }
     async fn booru_call(
         &self,
@@ -676,6 +712,25 @@ impl ApiClient for TestBooruClient {
         Ok(img_urls)
     }
     async fn view_img(&self, _img: Self::Post) -> Result<()> {
+        todo!()
+    }
+    async fn get_all_tags(&self) -> Result<Vec<String>> {
+        let _url = Self::URL;
+        let url = format!("{_url}/tags.json");
+        let response = self
+            .inner
+            .get(url)
+            .headers(get_headers())
+            .send()
+            .await
+            .unwrap()
+            .json::<Vec<String>>()
+            .await
+            .unwrap();
+        Ok(response)
+    }
+
+    async fn addMd5(&self, path: &str) -> Result<()> {
         todo!()
     }
 }

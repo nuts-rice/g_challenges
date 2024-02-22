@@ -11,7 +11,8 @@ cargo-fuzz = true
 libfuzzer-sys = "0.4"
 
 [dependencies.client]
-path = ".."
+name="client"
+path = "../"
 
 [[bin]]
 name = "fuzz_target_1"

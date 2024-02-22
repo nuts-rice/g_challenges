@@ -1,4 +1,4 @@
-use serde::{Deserialize};
+use serde::Deserialize;
 use std::fmt;
 #[derive(Debug, Clone, Deserialize)]
 pub struct SafebooruPost {

@@ -38,5 +38,3 @@ pub fn parse_tags(tags: Vec<Vec<String>>) -> Vec<TagRecord> {
     }
     tag_records
 }
-
-

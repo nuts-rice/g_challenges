@@ -3,21 +3,20 @@ use atomic_refcell::AtomicRefCell;
 use once_cell::sync::Lazy;
 use reqwest::header::USER_AGENT;
 
-
-use std::sync::{Arc};
+use serde::{Deserialize, Serialize};
+use std::sync::Arc;
 use tauri::{CustomMenuItem, Manager, Menu, MenuItem, Submenu};
-use tracing::{info};
-use serde::{Serialize, Deserialize};
+use tracing::info;
 pub mod api;
 pub mod error;
 pub mod model;
-pub mod viewer;
 pub mod utils;
+pub mod viewer;
 pub use api::*;
 pub use error::*;
 pub use model::*;
-pub use viewer::*;
 pub use utils::*;
+pub use viewer::*;
 
 // pub type Result<T> = std::result::Result<T, Box<dyn std::error::Error>>;
 #[derive(PartialEq, Serialize, Deserialize, Debug, Clone, Copy, Eq, Hash)]
@@ -139,6 +138,11 @@ async fn get_images_cmd(
     //Ok(images)
 }
 #[tauri::command]
+async fn tags_cmd() {
+    todo!()
+}
+
+#[tauri::command]
 async fn get_page_cmd(api_state: TestbooruAccess<'_>) -> Result<(), CrabbooruError> {
     let _api = api_state.inner();
     Ok(())
@@ -159,22 +163,21 @@ fn main_window() {
 }
 
 #[tauri::command]
-async fn booru_call_test(booru: BooruSite, tags: Vec<String>, page: u32, limit: u32)  -> Result<(), CrabbooruError> {
+async fn booru_call_test(
+    booru: BooruSite,
+    tags: Vec<String>,
+    page: u32,
+    limit: u32,
+) -> Result<(), CrabbooruError> {
     if booru == BooruSite::Testbooru {
         let client = TestBooruClient::new();
         let call = client.booru_call(tags, page, limit).await.unwrap();
         info!("test call: {:?}", call);
-            
-            
-    }
-    else if booru == BooruSite::Safebooru {
+    } else if booru == BooruSite::Safebooru {
         let client = SafebooruClient::new();
         let call = client.booru_call(tags, page, limit).await.unwrap();
         info!("safe call: {:?}", call);
-
-
     }
-    
 
     //TODO: this matching dont work ???
     // let result = match booru {
@@ -187,17 +190,21 @@ async fn booru_call_test(booru: BooruSite, tags: Vec<String>, page: u32, limit: 
     //     // Site::Rule34 => todo!(),
     //     BooruSite::Safebooru =>SafebooruClient::new(),
     //     BooruSite::Testbooru =>TestBooruClient::new(),
-                    
+
     //     // Site::Custom => todo!(),
     // };
     Ok(())
-
 }
 
 pub fn autocomplete_tag_helper(file: &str) {
     let tags_data = utils::read_CSV(file).unwrap();
     let parsed = utils::parse_tags(tags_data);
     info!("tags_data preview: {:?}", parsed[0]);
+}
+
+pub fn post_tags_helper(post: Post) {
+    let tags = post.tags;
+    info!("tags: {:?}", tags);
 }
 fn main() {
     tracing_subscriber::fmt().init();
@@ -240,7 +247,6 @@ fn main() {
         .add_submenu(tools_submenu)
         .add_submenu(view_submenu);
     tauri::Builder::default()
-        
         .manage(PreviewImgUrls.clone())
         // .manage(TestbooruClient{inner: Default::default()})
         // .manage(DanbooruClient{inner: Default::default()})
@@ -258,7 +264,6 @@ fn main() {
             // get_source,
             // get_images_cmd
         ])
-
         .setup(|app| {
             let _preview_img_urls: Vec<String> = Vec::new();
             let window = tauri::WindowBuilder::new(
@@ -283,6 +288,5 @@ fn main() {
             Ok(())
         })
         .run(tauri::generate_context!())
-
         .expect("error while running tauri application");
 }
