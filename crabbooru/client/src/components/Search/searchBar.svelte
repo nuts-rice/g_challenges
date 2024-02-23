@@ -1,12 +1,12 @@
 <script lang="ts">
   import { invoke } from "@tauri-apps/api/tauri";
   import { createEventDispatcher, onMount } from "svelte";
-  import { Dropdown, Search, ButtonSet, Button, Tag } from "carbon-components-svelte";
+  import { Checkbox, Dropdown, Search, ButtonSet, Button, Tag } from "carbon-components-svelte";
   import BooruResult from "../../api/image_api"
   import BooruSite from "../../api/image_api"
   import { readCSV } from "../../utils/file";
   //    import SearchBar from './SearchBar';
-
+  let booru_sites = ["Testbooru", "Safebooru", "Danbooru"]
   let isValid = false;
   let errorMsg = "";
   export let search;
@@ -16,7 +16,8 @@
   let searching = false;
   let suggestions = undefined;
   let currentSearch = undefined;
-
+  let checked = false;
+  let booruGroup = booru_sites.slice(0, 2);
   const handleBooruDropdown = () => {
     isDropdownOpen = !isDropdownOpen;
   };
@@ -106,9 +107,13 @@
 {errorMsg}
 validate search query test
 <section>
-  <Dropdown bind:selectedBooruId 
+  <!-- TODO: this should be checkbox  --->
+  {#each booru_sites as booru}
+    <Checkbox bind:booruGroup labelText={booru} {booru}/>
+{/each}
+<!--  <Dropdown bind:checked 
   size="sm"  
-  titleText="Booru"
+  labelText="Booru"
   selectedId = "0"
   on:select={handleBooruSelect}
   items={[
@@ -119,7 +124,7 @@ validate search query test
     let:item
     let:index
   >
-  </Dropdown>  
+  </Dropdown> ---> 
   <div>
     <Search bind:searchQuery />
     SearchQuery test
