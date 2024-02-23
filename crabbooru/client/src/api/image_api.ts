@@ -51,12 +51,11 @@ export interface MultipleTestbooruResponse {
   item_list: Array<TestbooruItem>;
 }
 
-
-export const BooruSite  ={
+export const BooruSite = {
   Testbooru: 0,
-  Safebooru : 1,
+  Safebooru: 1,
   Danbooru: 2,
-}
+};
 
 // export function () {
 //     const initial_state = {
@@ -98,48 +97,46 @@ export const getDanbooruImages = async (id: String) => {};
 
 export const getTestbooruImages = async (id: String) => {};
 
-export const getTestbooruCallId = async (
-  id: number
-) => {
-try {
-  const response = await invoke<SingleTestbooruResponse>("testbooru_call_id", {
-    id: id,
-  });
-  if (response.status_code == 200)  
-  console.log("get_testbooru_call_id: " + response)
-  const img_url = await invoke<string>("testbooru_post_img", {
-    post: response,
+export const getTestbooruCallId = async (id: number) => {
+  try {
+    const response = await invoke<SingleTestbooruResponse>(
+      "testbooru_call_id",
+      {
+        id: id,
+      }
+    );
+    if (response.status_code == 200)
+      console.log("get_testbooru_call_id: " + response);
+    const img_url = await invoke<string>("testbooru_post_img", {
+      post: response,
     });
     console.log("get_testbooru_call_id: img_url :" + img_url);
-  return img_url
+    return img_url;
   } catch (error) {
-  console.log(error);
-   } 
-   }
+    console.log(error);
+  }
+};
 
 // export const parseTestbooruImageUrl = (imageUrl: string): string | null => {}
 
-  
-
-
-export const viewTestbooruImage = async (id: number) => {}
+export const viewTestbooruImage = async (id: number) => {};
 
 export const getDanbooruCall = async (
   _tags: string[],
   _page: number,
   _limit: number
-) : Promise<MultipleDanbooruResponse | undefined> => {
+): Promise<MultipleDanbooruResponse | undefined> => {
   try {
-  const response = await invoke<MultipleDanbooruResponse>("danbooru_call", {
-    tags: _tags,
-    page: _page,
-    limit: _limit,
-  })
-  if (response.status_code == 200)
-  console.log("get_danbooru_call: " + response);
-  return response;
+    const response = await invoke<MultipleDanbooruResponse>("danbooru_call", {
+      tags: _tags,
+      page: _page,
+      limit: _limit,
+    });
+    if (response.status_code == 200)
+      console.log("get_danbooru_call: " + response);
+    return response;
   } catch (error) {
-  console.log(error);
+    console.log(error);
   }
 };
 
@@ -149,16 +146,16 @@ export const getTestbooruCall = async (
   _limit: number
 ) => {
   try {
-  const response = await invoke<MultipleTestbooruResponse>("testbooru_call", {
-    tags: _tags,
-    page: _page,
-    limit: _limit,
-  })
-  if (response.status_code == 200)
-  console.log("get_testbooru_call: " + response);
-  return response;
+    const response = await invoke<MultipleTestbooruResponse>("testbooru_call", {
+      tags: _tags,
+      page: _page,
+      limit: _limit,
+    });
+    if (response.status_code == 200)
+      console.log("get_testbooru_call: " + response);
+    return response;
   } catch (error) {
-  console.log(error);
+    console.log(error);
   }
   // if (response. && response.data && r<ScrollWheelUp>esponse.data.status_code === 200)
 
@@ -166,64 +163,88 @@ export const getTestbooruCall = async (
   // return response;
 };
 
-export const getTestImg = async (_response: SingleTestbooruResponse): Promise<string| undefined> => {
+export const getTestImg = async (
+  _response: SingleTestbooruResponse
+): Promise<string | undefined> => {
   try {
     const url = _response.item_list[0].img.img_adr.url_list[0];
-     
+
     console.log("get_test_img: url :" + url);
     return url;
   } catch (error) {
-  console.log(error);
-    }
-}
+    console.log(error);
+  }
+};
 
 export const getSingleTestbooruImg = async (_post: TestbooruItem) => {
   try {
     const img_url = await invoke<string>("testbooru_post_img", {
-    post: _post,
-  })
-  // if (post.img.img_adr.url_list[0] == img_url)
-  console.log("get_single_testbooru_img: url :" + img_url);
-  return img_url;
+      post: _post,
+    });
+    // if (post.img.img_adr.url_list[0] == img_url)
+    console.log("get_single_testbooru_img: url :" + img_url);
+    return img_url;
   } catch (error) {
-  console.log(error);
+    console.log(error);
   }
-
 };
 
 export default class BooruResult extends Array<Post> {
-public booru_id: number
-public page: number
-public readonly tags: string[]
-public readonly posts: Post[] 
+  public booru_id: number;
+  public page: number;
+  public readonly tags: string[];
+  public readonly posts: Post[];
 
-constructor(booru_id: number, page: number, tags: string[], posts: Post[]) {
-  super(posts.length)
-  for (let i = 0; i < posts.length; i++) {
-    this[i] = posts[i]
+  constructor(booru_id: number, page: number, tags: string[], posts: Post[]) {
+    super(posts.length);
+    for (let i = 0; i < posts.length; i++) {
+      this[i] = posts[i];
+    }
+    this.booru_id = booru_id;
+    this.page = page;
+    this.tags = tags;
+    this.posts = posts;
   }
-  this.booru_id = booru_id
-  this.page = page
-  this.tags = tags
-  this.posts = posts
-}
-public booru_call = async (_tags: string[],
-  _page: number,
-  _limit: number
-) => {
-  try {
-  const response = await invoke<BooruResult>("booru_call_test", {booru: this.booru_id, tags: _tags, page: _page, limit: _limit})
+  public booru_call = async (
+    _tags: string[],
+    _page: number,
+    _limit: number
+  ) => {
+    try {
+      const response = await invoke<BooruResult>("booru_call_test", {
+        booru: this.booru_id,
+        tags: _tags,
+        page: _page,
+        limit: _limit,
+      });
       // if (response.status_code == 200)
       console.log("booru_call: response: " + response);
       return response;
-    }catch (error) {
-  console.log(error);
-  }
-}
+    } catch (error) {
+      console.log(error);
+    }
+  };
 
-public parseBooruCall = async (response: any) => {
-      
+  public booru_call_id = async (id: number) => {
+    try {
+      const response = await invoke<BooruResult>("booru_call_id", {
+        booru: this.booru_id,
+        id: id,
+      });
+      console.log("booru_call_id: response: " + response);
+      return response;
+    } catch (error) {
+      console.log(error);
+    }
+  };
 
-}
-
+  public parseBooruCall = async (response: any) => {
+    try {
+      const posts = response.posts;
+      console.log("parse_booru_call: posts: " + posts);
+      return posts;
+    } catch (error) {
+      console.log(error);
+    }
+  };
 }

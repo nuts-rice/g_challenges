@@ -49,6 +49,7 @@ pub trait ApiClient {
     async fn view_img(&self, img: Self::Post) -> Result<()>;
     async fn get_all_tags(&self) -> Result<Vec<String>>;
     async fn addMd5(&self, path: &str) -> Result<()>;
+    async fn favorite_post(&self, post: Self::Post) -> Result<()>;
 }
 
 // ctx: PooledContext,
@@ -639,6 +640,9 @@ impl ApiClient for SafebooruClient {
     async fn addMd5(&self, path: &str) -> Result<()> {
         todo!()
     }
+    async fn favorite_post(&self, _post: Self::Post) -> Result<()> {
+        todo!()
+    }
 }
 
 pub struct TestBooruClient {
@@ -731,6 +735,9 @@ impl ApiClient for TestBooruClient {
     }
 
     async fn addMd5(&self, path: &str) -> Result<()> {
+        todo!()
+    }
+    async fn favorite_post(&self, post: Self::Post) -> Result<()> {
         todo!()
     }
 }
