@@ -11,7 +11,7 @@ use std::{any::Any, collections::HashMap};
 
 use tauri::State;
 use tracing::info;
-
+use tracing_test::traced_test;
 const TEST_URL: &str = "https://testbooru.donmai.us";
 const DANBOORU_URL: &str = "https://danbooru.donmai.us";
 pub const USR_USER_AGENT: &str = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/58.0.3029.110 Safari/537.3";
@@ -577,10 +577,17 @@ impl ApiClient for SafebooruClient {
     }
     async fn booru_call_id(&self, _id: u32) -> Result<SafebooruPost> {
         let _url = Self::URL;
-        let url = format!("{_url}/posts/{_id}.json");
+        let url = format!("{_url}/posts.json");
         let res = reqwest::Client::new()
             .get(url)
-            .headers(get_headers())
+            .query(&[
+                ("page", "dapi"),
+                ("s", "post"),
+                ("q", "index"),
+                ("id", &_id.to_string().as_str()),
+                ("json", "1"),
+                            
+            ])
             .send()
             .await
             .unwrap()
@@ -601,7 +608,7 @@ impl ApiClient for SafebooruClient {
         limit: u32,
     ) -> Result<Vec<SafebooruPost>> {
         let _url = Self::URL;
-        let url = format!("{_url}/index.php");
+        let url = format!("{_url}/posts.json");
         let _tags = tags.join(" ");
         info!("SafeBooru Tags: {}", &_tags);
         info!("SafeBooru URL: {}", &url);
@@ -617,7 +624,7 @@ impl ApiClient for SafebooruClient {
         info!("Safe Query: {:?}", query);
         let response = query
             .send()
-            .await
+            .await                        
             .unwrap()
             .json::<Vec<SafebooruPost>>()
             .await
@@ -635,7 +642,19 @@ impl ApiClient for SafebooruClient {
         todo!()
     }
     async fn get_all_tags(&self) -> Result<Vec<String>> {
-        todo!()
+        let _url = Self::URL;
+        let url = format!("{_url}/tags.json");
+        let response = self
+            .inner
+            .get(url)
+            .send()
+            .await
+            .unwrap()
+            .json::<Vec<String>>()
+            .await
+            .unwrap();
+        Ok(response)            
+
     }
     async fn addMd5(&self, path: &str) -> Result<()> {
         todo!()
@@ -752,13 +771,38 @@ mod test {
     use super::*;
 
     #[tokio::test]
+    #[traced_test]
     async fn posts_with_tag_test() {
-        let tags = vec!["muscular_female".to_string(), "dorohedoro".to_string()];
-        let builder = ApiBuilder::<TestbooruClient>::new()
-            .tag(tags[0].clone())
-            .tag(tags[1].clone());
-        let _api = builder.build().get().await;
+        let tags = vec!["houseki_no_kuni".to_string()];
+        let client = TestBooruClient::new();
+        let request = client.booru_call(tags, 1, 100).await.unwrap();
+        info!("Test Request: {:?}", request);
+        request.iter().for_each(|post| {
+            if post.file_url.is_some()  {
+            info!("Test Post: {:?}", post);
+            let file_url = &post.file_url.clone().unwrap();
+            info!("Test File URL: {:?}", file_url);
+            assert!(file_url.contains(".png") || file_url.contains(".jpg"));
+            }
+                    
+        });
+
     }
+    #[tokio::test]
+    #[traced_test]
+    async fn safebooru_posts_with_tag_test() {
+        let tags = vec!["danboo".to_string(), ];
+        let client = SafebooruClient::new();
+        let request = client.booru_call(tags, 1, 100).await;
+        let response = request.unwrap();
+        response.iter().for_each(|post| {
+            info!("Safe Post: {:?}", post);
+            let file_url = &post.image;
+            info!("Safe File URL: {:?}", file_url);
+            assert!(file_url.contains(".png") || file_url.contains(".jpg"));
+        });
+
+}
 }
 
 // pub async fn parse_response_test(post: TestbooruPost) {
