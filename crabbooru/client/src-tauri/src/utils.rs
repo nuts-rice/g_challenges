@@ -3,10 +3,10 @@ use std::io::{self, Read};
 
 #[derive(Clone, Debug)]
 pub struct TagRecord {
-    name: String,
-    tag_type: String,
-    post_count: i32,
-    aliases: Vec<String>,
+    pub name: String,
+    pub tag_type: String,
+    pub post_count: i32,
+    pub aliases: Vec<String>,
 }
 
 pub fn read_file(filename: &str) -> Result<String, io::Error> {

@@ -3,12 +3,15 @@ use std::fmt;
 #[derive(Debug, Clone, Deserialize)]
 pub struct SafebooruPost {
     pub id: i32,
+    pub created_at: String,
+    pub uploader_id: i32,
     pub score: Option<u32>,
+    pub source: String,
     pub height: u32,
     pub width: u32,
     pub hash: String,
     pub tags: String,
-    pub image: String,
+    pub file_url: Option<String>,
     pub change: u32,
     pub rating: SafebooruRating,
 }

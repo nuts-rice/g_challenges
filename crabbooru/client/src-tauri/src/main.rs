@@ -7,6 +7,7 @@ use serde::{Deserialize, Serialize};
 use std::sync::Arc;
 use tauri::{CustomMenuItem, Manager, Menu, MenuItem, Submenu};
 use tracing::info;
+use tracing_test::traced_test;
 pub mod api;
 pub mod error;
 pub mod model;
@@ -21,7 +22,7 @@ pub use viewer::*;
 // pub type Result<T> = std::result::Result<T, Box<dyn std::error::Error>>;
 #[derive(PartialEq, Serialize, Deserialize, Debug, Clone, Copy, Eq, Hash)]
 pub enum BooruSite {
-    // Danbooru,
+    Danbooru,
     // Gelbooru,
     // Sankaku,
     // Yandere,
@@ -138,8 +139,20 @@ async fn get_images_cmd(
     //Ok(images)
 }
 #[tauri::command]
-async fn tags_cmd() {
-    todo!()
+async fn auto_tags_cmd(input: &str) -> Result<Vec<String>, CrabbooruError>{
+    let tags_data = autocomplete_tag_helper("../tags/danbooru.csv");
+    let mut tags_names: Vec<String> = tags_data.unwrap().into_iter().map(|tag| tag.name).collect();
+    let suggestion = tags_names.iter().filter(|&name| name.contains(input)).cloned().collect();
+    // for char in input.chars() {
+    //     if char == ' ' {
+    //         break;
+    //     }
+    //     canidates.push(char);
+    // }
+
+    Ok(suggestion)
+
+    
 }
 
 #[tauri::command]
@@ -157,6 +170,7 @@ async fn connect_api_cmd(api_state: TestbooruAccess<'_>) -> Result<(), Crabbooru
     let _api = api_state.inner();
     Ok(())
 }
+
 #[tauri::command]
 fn main_window() {
     todo!()
@@ -164,16 +178,16 @@ fn main_window() {
 
 #[tauri::command]
 async fn booru_call_test(
-    booru: BooruSite,
+    boorus: Vec<String>,
     tags: Vec<String>,
     page: u32,
     limit: u32,
 ) -> Result<(), CrabbooruError> {
-    if booru == BooruSite::Testbooru {
+    if boorus.contains(&String::from("Testbooru")) {
         let client = TestBooruClient::new();
         let call = client.booru_call(tags, page, limit).await.unwrap();
         info!("test call: {:?}", call);
-    } else if booru == BooruSite::Safebooru {
+    } else if boorus.contains(&String::from("Safebooru"))  {
         let client = SafebooruClient::new();
         let call = client.booru_call(tags, page, limit).await.unwrap();
         info!("safe call: {:?}", call);
@@ -196,10 +210,11 @@ async fn booru_call_test(
     Ok(())
 }
 
-pub fn autocomplete_tag_helper(file: &str) {
+pub fn autocomplete_tag_helper(file: &str)  -> Result<Vec<TagRecord>, CrabbooruError> {
     let tags_data = utils::read_CSV(file).unwrap();
     let parsed = utils::parse_tags(tags_data);
     info!("tags_data preview: {:?}", parsed[0]);
+    Ok(parsed)
 }
 
 pub fn post_tags_helper(post: Post) {
@@ -290,3 +305,20 @@ fn main() {
         .run(tauri::generate_context!())
         .expect("error while running tauri application");
 }
+
+
+#[cfg(test)]
+mod test {
+    use super::*;
+    #[tokio::test]
+    #[traced_test]
+    async fn auto_tags_test() {
+        let input = "houseki_n";
+        let canidates = vec!["houseki_no_kuni".to_string()];
+        let result = auto_tags_cmd(input).await.unwrap();
+        info!("result: {:?}", result);
+        let expected = result.contains(&canidates[0]);        
+        assert_eq!(expected, true);
+    }
+}
+

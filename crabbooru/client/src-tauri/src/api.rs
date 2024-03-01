@@ -1,5 +1,6 @@
 use crate::error::CrabbooruError;
 use crate::model::{DanbooruPost, SafebooruPost, TestbooruPost};
+use crate::SafebooruRating;
 use async_trait::async_trait;
 use reqwest::{
     header,
@@ -576,16 +577,17 @@ impl ApiClient for SafebooruClient {
         }
     }
     async fn booru_call_id(&self, _id: u32) -> Result<SafebooruPost> {
+        let builder = &self.inner;
         let _url = Self::URL;
         let url = format!("{_url}/posts.json");
-        let res = reqwest::Client::new()
+        let res = builder
             .get(url)
             .query(&[
-                ("page", "dapi"),
-                ("s", "post"),
-                ("q", "index"),
+                // ("page", "dapi"),
+                // ("s", "post"),
+                // ("q", "index"),
                 ("id", &_id.to_string().as_str()),
-                ("json", "1"),
+                // ("json", "1"),
                             
             ])
             .send()
@@ -595,10 +597,8 @@ impl ApiClient for SafebooruClient {
             .await
             .unwrap();
         info!("booru_call_id query: {:?}", res);
-        let body = format!("{:?}: {:?}\n", res.id, &res.image);
+        let body = format!("{:?}: {:?}\n", &res.id, &res.file_url.as_ref());
         info!("booru_call_id body: {:?}", body);
-        let img_url = &res.image;
-        info!("booru_call_id img_url: {:?}", img_url);
         Ok(res)
     }
     async fn booru_call(
@@ -607,19 +607,27 @@ impl ApiClient for SafebooruClient {
         page: u32,
         limit: u32,
     ) -> Result<Vec<SafebooruPost>> {
+        let builder = &self.inner;
         let _url = Self::URL;
         let url = format!("{_url}/posts.json");
         let _tags = tags.join(" ");
         info!("SafeBooru Tags: {}", &_tags);
         info!("SafeBooru URL: {}", &url);
-        let query = self.inner.get(url).headers(get_headers()).query(&[
-            ("page", "dapi"),
-            ("s", "post"),
-            ("q", "index"),
-            ("pid", page.to_string().as_str()),
+        let query = builder.get(url).headers(get_headers()).query(&[
             ("limit", limit.to_string().as_str()),
+            ("page", page.to_string().as_str()),
             ("tags", &_tags),
-            ("json", "1"),
+            ("rating", SafebooruRating::General.to_string().as_str()),
+
+
+
+            // ("page", "dapi"),
+            // ("s", "post"),
+            // ("q", "index"),
+            // ("pid", page.to_string().as_str()),
+            // ("limit", limit.to_string().as_str()),
+            // ("tags", &_tags),
+            // ("json", "1"),
         ]);
         info!("Safe Query: {:?}", query);
         let response = query
@@ -632,8 +640,8 @@ impl ApiClient for SafebooruClient {
         Ok(response)
     }
     async fn parse_post(&self, post: Self::Post) -> Result<String> {
-        let img_url = post.image;
-        Ok(img_url)
+        let img_url = post.file_url;
+        Ok(img_url.unwrap())
     }
     async fn parse_posts(&self, _response: Vec<Self::Post>) -> Result<Vec<String>> {
         todo!()
@@ -775,14 +783,16 @@ mod test {
     async fn posts_with_tag_test() {
         let tags = vec!["houseki_no_kuni".to_string()];
         let client = TestBooruClient::new();
-        let request = client.booru_call(tags, 1, 100).await.unwrap();
+        let request = client.booru_call(tags, 1, 100).await;
         info!("Test Request: {:?}", request);
-        request.iter().for_each(|post| {
+        assert!(request.is_ok());
+
+        request.unwrap().iter().for_each(|post| {
             if post.file_url.is_some()  {
             info!("Test Post: {:?}", post);
             let file_url = &post.file_url.clone().unwrap();
             info!("Test File URL: {:?}", file_url);
-            assert!(file_url.contains(".png") || file_url.contains(".jpg"));
+            assert!(file_url.contains(".png") || file_url.contains(".jpg"))
             }
                     
         });
@@ -791,15 +801,19 @@ mod test {
     #[tokio::test]
     #[traced_test]
     async fn safebooru_posts_with_tag_test() {
-        let tags = vec!["danboo".to_string(), ];
+        let tags = vec!["houseki_no_kuni".to_string(), ];
         let client = SafebooruClient::new();
-        let request = client.booru_call(tags, 1, 100).await;
-        let response = request.unwrap();
-        response.iter().for_each(|post| {
+        let response = client.booru_call(tags, 1, 100).await;
+        assert!(response.is_ok());
+
+        response.unwrap().iter().for_each(|post| {
+            if post.file_url.is_some()  {
+
             info!("Safe Post: {:?}", post);
-            let file_url = &post.image;
+            let file_url = &post.file_url.clone().unwrap();
             info!("Safe File URL: {:?}", file_url);
             assert!(file_url.contains(".png") || file_url.contains(".jpg"));
+            }
         });
 
 }
