@@ -1,4 +1,4 @@
-use crate::{api::Post, BooruSite};
+use crate::{BooruSite};
 use chrono::{DateTime, Utc};
 pub struct Favorite {
     name: String,
@@ -41,7 +41,7 @@ impl Favorite {
     async fn favorite_post(&self) {}
 }
 impl From<serde_json::Value> for Favorite {
-    fn from(value: serde_json::Value) -> Self {
+    fn from(_value: serde_json::Value) -> Self {
         todo!()
     }
 }

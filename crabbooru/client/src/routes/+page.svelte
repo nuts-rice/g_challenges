@@ -3,6 +3,9 @@
   import MainWindow from "./MainWindow.svelte";
   import Table from "../components/Table/table.svelte";
   import SearchBar from "../components/Search/searchBar.svelte";
+  import SearchTab from "../components/Tabs/searchTab.svelte";
+  import FavoritesTab from "../components/Tabs/favoritesTab.svelte";
+  import {Tabs, Tab, TabContent} from "carbon-components-svelte";
 </script>
 
 <head>
@@ -12,13 +15,27 @@
 <app-root></app-root>
 <div>Tags List</div>
 <section>
+  <Tabs>
+    <Tab label="Search">
+      <svelte:fragment slot="content">
+      <TabContent> 
+        <SearchTab />
+        <SearchBar/>
+      </TabContent>
+      </svelte:fragment>
+    </Tab>
+    <Tab label="Favorites">
+      <svelte:fragment slot="content">
+      <TabContent> 
+        <FavoritesTab />
+      </TabContent>
+      </svelte:fragment>
+    </Tab>    
+  </Tabs> 
+</section>   
+<section>
   <SearchBar />
 </section>
-<section>
-  Search tab
-  <search_tab />
-</section>
-
 <section>
   Image gallery goes here
 
@@ -59,5 +76,13 @@
     justify-content: center;
     align-items: center;
     flex-wrap: wrap;
+  }
+  .tab-content {
+    overflow: scroll; 
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    height: 100%;
   }
 </style>

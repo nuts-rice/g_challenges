@@ -141,7 +141,7 @@ async fn get_images_cmd(
 #[tauri::command]
 async fn auto_tags_cmd(input: &str) -> Result<Vec<String>, CrabbooruError>{
     let tags_data = autocomplete_tag_helper("../tags/danbooru.csv");
-    let mut tags_names: Vec<String> = tags_data.unwrap().into_iter().map(|tag| tag.name).collect();
+    let tags_names: Vec<String> = tags_data.unwrap().into_iter().map(|tag| tag.name).collect();
     let suggestion = tags_names.iter().filter(|&name| name.contains(input)).cloned().collect();
     // for char in input.chars() {
     //     if char == ' ' {
@@ -266,6 +266,7 @@ fn main() {
         // .manage(TestbooruClient{inner: Default::default()})
         // .manage(DanbooruClient{inner: Default::default()})
         .invoke_handler(tauri::generate_handler![
+            auto_tags_cmd,
             testbooru_call,
             testbooru_call_id,
             testbooru_post_img,

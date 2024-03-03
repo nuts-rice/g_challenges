@@ -9,10 +9,9 @@ cargo-fuzz = true
 
 [dependencies]
 libfuzzer-sys = "0.4"
-
-[dependencies.client]
-name="client"
-path = "../"
+# client = { git = "https://github.com/nuts-rice/g_challenges/tree/crabbooru/client.git", branch = "main" }
+# [workspace]
+# members = ["."]
 
 [[bin]]
 name = "fuzz_target_1"

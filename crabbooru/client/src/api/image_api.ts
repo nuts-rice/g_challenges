@@ -51,10 +51,10 @@ export interface MultipleTestbooruResponse {
   item_list: Array<TestbooruItem>;
 }
 
-export const BooruSite = {
-  Testbooru: 0,
-  Safebooru: 1,
-  Danbooru: 2,
+export enum BooruSite {
+  Testbooru,
+  Safebooru,
+  Danbooru,
 };
 
 // export function () {
@@ -190,17 +190,17 @@ export const getSingleTestbooruImg = async (_post: TestbooruItem) => {
 };
 
 export default class BooruResult extends Array<Post> {
-  public booru_id: number;
+  public boorus: string[];
   public page: number;
   public readonly tags: string[];
   public readonly posts: Post[];
 
-  constructor(booru_id: number, page: number, tags: string[], posts: Post[]) {
+  constructor(boorus: string[], page: number, tags: string[], posts: Post[]) {
     super(posts.length);
     for (let i = 0; i < posts.length; i++) {
       this[i] = posts[i];
     }
-    this.booru_id = booru_id;
+    this.boorus = boorus;
     this.page = page;
     this.tags = tags;
     this.posts = posts;
@@ -212,7 +212,7 @@ export default class BooruResult extends Array<Post> {
   ) => {
     try {
       const response = await invoke<BooruResult>("booru_call_test", {
-        booru: this.booru_id,
+        boorus: this.boorus,
         tags: _tags,
         page: _page,
         limit: _limit,
@@ -228,7 +228,7 @@ export default class BooruResult extends Array<Post> {
   public booru_call_id = async (id: number) => {
     try {
       const response = await invoke<BooruResult>("booru_call_id", {
-        booru: this.booru_id,
+        booru: this.boorus,
         id: id,
       });
       console.log("booru_call_id: response: " + response);
@@ -237,7 +237,7 @@ export default class BooruResult extends Array<Post> {
       console.log(error);
     }
   };
-
+  public parse_booru_call_id = async (response: any) => { }
   public parseBooruCall = async (response: any) => {
     try {
       const posts = response.posts;

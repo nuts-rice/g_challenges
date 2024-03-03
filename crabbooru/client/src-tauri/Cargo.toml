@@ -30,6 +30,7 @@ chrono = "0.4.33"
 once_cell = "1.19.0"
 atomic_refcell = "0.1.13"
 csv = "1.3.0"
+tracing-test = "0.2.4"
 [package.metadata.packager]
 before-packaging-command = "cargo build --release"
 

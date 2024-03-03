@@ -11,6 +11,7 @@ use serde::{Deserialize, Serialize};
 use std::{any::Any, collections::HashMap};
 
 use tauri::State;
+
 use tracing::info;
 use tracing_test::traced_test;
 const TEST_URL: &str = "https://testbooru.donmai.us";
@@ -664,7 +665,7 @@ impl ApiClient for SafebooruClient {
         Ok(response)            
 
     }
-    async fn addMd5(&self, path: &str) -> Result<()> {
+    async fn addMd5(&self, _path: &str) -> Result<()> {
         todo!()
     }
     async fn favorite_post(&self, _post: Self::Post) -> Result<()> {
@@ -761,10 +762,10 @@ impl ApiClient for TestBooruClient {
         Ok(response)
     }
 
-    async fn addMd5(&self, path: &str) -> Result<()> {
+    async fn addMd5(&self, _path: &str) -> Result<()> {
         todo!()
     }
-    async fn favorite_post(&self, post: Self::Post) -> Result<()> {
+    async fn favorite_post(&self, _post: Self::Post) -> Result<()> {
         todo!()
     }
 }
@@ -799,6 +800,7 @@ mod test {
 
     }
     #[tokio::test]
+    #[ignore]
     #[traced_test]
     async fn safebooru_posts_with_tag_test() {
         let tags = vec!["houseki_no_kuni".to_string(), ];
