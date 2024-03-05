@@ -1,4 +1,4 @@
-use crate::{BooruSite};
+use crate::BooruSite;
 use chrono::{DateTime, Utc};
 pub struct Favorite {
     name: String,

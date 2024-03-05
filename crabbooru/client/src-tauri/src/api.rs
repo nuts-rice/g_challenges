@@ -13,7 +13,7 @@ use std::{any::Any, collections::HashMap};
 use tauri::State;
 
 use tracing::info;
-use tracing_test::traced_test;
+
 const TEST_URL: &str = "https://testbooru.donmai.us";
 const DANBOORU_URL: &str = "https://danbooru.donmai.us";
 pub const USR_USER_AGENT: &str = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/58.0.3029.110 Safari/537.3";
@@ -589,7 +589,6 @@ impl ApiClient for SafebooruClient {
                 // ("q", "index"),
                 ("id", &_id.to_string().as_str()),
                 // ("json", "1"),
-                            
             ])
             .send()
             .await
@@ -619,9 +618,6 @@ impl ApiClient for SafebooruClient {
             ("page", page.to_string().as_str()),
             ("tags", &_tags),
             ("rating", SafebooruRating::General.to_string().as_str()),
-
-
-
             // ("page", "dapi"),
             // ("s", "post"),
             // ("q", "index"),
@@ -633,7 +629,7 @@ impl ApiClient for SafebooruClient {
         info!("Safe Query: {:?}", query);
         let response = query
             .send()
-            .await                        
+            .await
             .unwrap()
             .json::<Vec<SafebooruPost>>()
             .await
@@ -662,8 +658,7 @@ impl ApiClient for SafebooruClient {
             .json::<Vec<String>>()
             .await
             .unwrap();
-        Ok(response)            
-
+        Ok(response)
     }
     async fn addMd5(&self, _path: &str) -> Result<()> {
         todo!()
@@ -789,36 +784,32 @@ mod test {
         assert!(request.is_ok());
 
         request.unwrap().iter().for_each(|post| {
-            if post.file_url.is_some()  {
-            info!("Test Post: {:?}", post);
-            let file_url = &post.file_url.clone().unwrap();
-            info!("Test File URL: {:?}", file_url);
-            assert!(file_url.contains(".png") || file_url.contains(".jpg"))
+            if post.file_url.is_some() {
+                info!("Test Post: {:?}", post);
+                let file_url = &post.file_url.clone().unwrap();
+                info!("Test File URL: {:?}", file_url);
+                assert!(file_url.contains(".png") || file_url.contains(".jpg"))
             }
-                    
         });
-
     }
     #[tokio::test]
     #[ignore]
     #[traced_test]
     async fn safebooru_posts_with_tag_test() {
-        let tags = vec!["houseki_no_kuni".to_string(), ];
+        let tags = vec!["houseki_no_kuni".to_string()];
         let client = SafebooruClient::new();
         let response = client.booru_call(tags, 1, 100).await;
         assert!(response.is_ok());
 
         response.unwrap().iter().for_each(|post| {
-            if post.file_url.is_some()  {
-
-            info!("Safe Post: {:?}", post);
-            let file_url = &post.file_url.clone().unwrap();
-            info!("Safe File URL: {:?}", file_url);
-            assert!(file_url.contains(".png") || file_url.contains(".jpg"));
+            if post.file_url.is_some() {
+                info!("Safe Post: {:?}", post);
+                let file_url = &post.file_url.clone().unwrap();
+                info!("Safe File URL: {:?}", file_url);
+                assert!(file_url.contains(".png") || file_url.contains(".jpg"));
             }
         });
-
-}
+    }
 }
 
 // pub async fn parse_response_test(post: TestbooruPost) {

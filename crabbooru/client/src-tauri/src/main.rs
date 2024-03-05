@@ -7,7 +7,7 @@ use serde::{Deserialize, Serialize};
 use std::sync::Arc;
 use tauri::{CustomMenuItem, Manager, Menu, MenuItem, Submenu};
 use tracing::info;
-use tracing_test::traced_test;
+
 pub mod api;
 pub mod error;
 pub mod model;
@@ -139,10 +139,14 @@ async fn get_images_cmd(
     //Ok(images)
 }
 #[tauri::command]
-async fn auto_tags_cmd(input: &str) -> Result<Vec<String>, CrabbooruError>{
+async fn auto_tags_cmd(input: &str) -> Result<Vec<String>, CrabbooruError> {
     let tags_data = autocomplete_tag_helper("../tags/danbooru.csv");
     let tags_names: Vec<String> = tags_data.unwrap().into_iter().map(|tag| tag.name).collect();
-    let suggestion = tags_names.iter().filter(|&name| name.contains(input)).cloned().collect();
+    let suggestion = tags_names
+        .iter()
+        .filter(|&name| name.contains(input))
+        .cloned()
+        .collect();
     // for char in input.chars() {
     //     if char == ' ' {
     //         break;
@@ -151,8 +155,6 @@ async fn auto_tags_cmd(input: &str) -> Result<Vec<String>, CrabbooruError>{
     // }
 
     Ok(suggestion)
-
-    
 }
 
 #[tauri::command]
@@ -187,7 +189,7 @@ async fn booru_call_test(
         let client = TestBooruClient::new();
         let call = client.booru_call(tags, page, limit).await.unwrap();
         info!("test call: {:?}", call);
-    } else if boorus.contains(&String::from("Safebooru"))  {
+    } else if boorus.contains(&String::from("Safebooru")) {
         let client = SafebooruClient::new();
         let call = client.booru_call(tags, page, limit).await.unwrap();
         info!("safe call: {:?}", call);
@@ -210,7 +212,7 @@ async fn booru_call_test(
     Ok(())
 }
 
-pub fn autocomplete_tag_helper(file: &str)  -> Result<Vec<TagRecord>, CrabbooruError> {
+pub fn autocomplete_tag_helper(file: &str) -> Result<Vec<TagRecord>, CrabbooruError> {
     let tags_data = utils::read_CSV(file).unwrap();
     let parsed = utils::parse_tags(tags_data);
     info!("tags_data preview: {:?}", parsed[0]);
@@ -307,7 +309,6 @@ fn main() {
         .expect("error while running tauri application");
 }
 
-
 #[cfg(test)]
 mod test {
     use super::*;
@@ -318,8 +319,7 @@ mod test {
         let canidates = vec!["houseki_no_kuni".to_string()];
         let result = auto_tags_cmd(input).await.unwrap();
         info!("result: {:?}", result);
-        let expected = result.contains(&canidates[0]);        
+        let expected = result.contains(&canidates[0]);
         assert_eq!(expected, true);
     }
 }
-
