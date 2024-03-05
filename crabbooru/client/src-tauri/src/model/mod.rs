@@ -6,6 +6,8 @@ pub mod profile;
 pub use profile::*;
 pub mod favorite;
 pub use favorite::*;
+pub mod md5_db;
+pub use md5_db::*;
 pub mod testbooru;
 pub use testbooru::*;
 pub mod safebooru;
