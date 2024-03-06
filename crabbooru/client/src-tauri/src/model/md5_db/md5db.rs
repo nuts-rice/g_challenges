@@ -1,21 +1,31 @@
+// see: https://github.com/Bionus/imgbrd-grabber/blob/master/src/lib/src/models/md5-database
 use crate::CrabbooruError;
 use async_trait::async_trait;
+use r2d2::PooledConnection;
 
-use std::collections::HashMap;
+use std::{collections::HashMap, time::Duration};
 
+use r2d2_redis::{r2d2, RedisConnectionManager};
+use r2d2_redis::redis::{Commands};
 
+type Result<T> = std::result::Result<T, CrabbooruError>;
 #[async_trait]
 pub trait Md5Db {
     type Record;
     const NAME: &'static str;
-    const COUNT: &'static u64;
-    async fn action(&self, record: Self::Record)
-        -> Result<HashMap<String, String>, CrabbooruError>;
-    async fn exists(&self, record: Self::Record) -> Result<Vec<String>, CrabbooruError>;
-    async fn sync(&self) -> Result<(), CrabbooruError>;
-    async fn remove(&self, record: Self::Record) -> Result<(), CrabbooruError>;
-    async fn count(&self) -> Result<u64, CrabbooruError>;
-    async fn paths(&self) -> Result<Vec<String>, CrabbooruError>;
+    const COUNT: &'static u32;
+    const TIMEOUT: &'static u64;
+    const RECONNECT_INTERVAL: &'static u32;
+    const POOL_MAX_OPEN: &'static u32;
+    async fn action(&self, record: Self::Record) -> Result<HashMap<String, String>>;
+    async fn add(&self, record: Self::Record) -> Result<()>;
+    async fn connect(&self) -> Result<r2d2::Pool<RedisConnectionManager>>;
+    async fn get_conn(&self) -> Result<PooledConnection<RedisConnectionManager>>;
+    async fn exists(&self, record: Self::Record) -> Result<Vec<String>>;
+    async fn sync(&self) -> Result<()>;
+    async fn remove(&self, record: Self::Record) -> Result<()>;
+    async fn count(&self) -> Result<u64>;
+    async fn paths(&self) -> Result<Vec<String>>;
 }
 
 struct Md5RedisDb {
@@ -24,19 +34,19 @@ struct Md5RedisDb {
 }
 
 struct Md5RedisRecord {
+    pub channel: String,
     pub md5: String,
-    pub value: String,
 }
 
 #[async_trait]
 impl Md5Db for Md5RedisDb {
     type Record = Md5RedisRecord;
     const NAME: &'static str = "md5_redis";
-    const COUNT: &'static u64 = &0;
-    async fn action(
-        &self,
-        _record: Self::Record,
-    ) -> Result<HashMap<String, String>, CrabbooruError> {
+    const TIMEOUT: &'static u64 = &1;
+    const RECONNECT_INTERVAL: &'static u32 = &100;
+    const POOL_MAX_OPEN: &'static u32 = &10;
+    const COUNT: &'static u32 = &0;
+    async fn action(&self, _record: Self::Record) -> Result<HashMap<String, String>> {
         todo!()
         // let mut conn = self.pool.get().await?;
         // let mut cmd = redis::cmd("HSET");
@@ -46,7 +56,42 @@ impl Md5Db for Md5RedisDb {
         // let _: () = cmd.query_async(&mut *conn).await?;
         // Ok(HashMap::new())
     }
-    async fn exists(&self, _record: Self::Record) -> Result<Vec<String>, CrabbooruError> {
+
+    async fn get_conn(&self) -> Result<PooledConnection<RedisConnectionManager>> {
+        let pool = self.connect().await?;
+        pool.get_timeout(Duration::from_secs(*Self::TIMEOUT));
+        let result = pool.get().unwrap();
+        Ok(result)            
+    }
+    //TODO: type error with .set
+    async fn add(&self, _record: Self::Record) -> Result<()> {
+        let mut conn = self.get_conn().await?;
+            //.set(_record.channel, _record.md5);
+        
+        // let _: () = redis::cmd("SET").arg(_record.channel).arg(_record.md5);
+                                                           
+        Ok(())
+        // let mut conn = self.pool.get().await?;
+        // let mut cmd = redis::cmd("HSET");
+        // cmd.arg(MD5_REDIS_NAME);
+        // cmd.arg(record.md5);
+        // cmd.arg(record.value);
+        // let _: () = cmd.query_async(&mut *conn).await?;
+        // Ok(())
+    }
+    async fn connect(&self) -> Result<r2d2::Pool<RedisConnectionManager>> {
+        let manager =
+            RedisConnectionManager::new(self.config.host.as_str()).expect("Redis client error");
+        let pool = r2d2::Pool::builder()
+            .max_size(*Self::POOL_MAX_OPEN)
+            // .max_lifetime(Some((*Self::TIMEOUT as i64)))
+            .build(manager)
+            // .map_err(|e| r2d2::Error::from(Some(e.to_string())))
+            .unwrap();
+
+        Ok(pool)
+    }
+    async fn exists(&self, _record: Self::Record) -> Result<Vec<String>> {
         todo!()
         // let mut conn = self.pool.get().await?;
         // let mut cmd = redis::cmd("HGET");
@@ -55,16 +100,45 @@ impl Md5Db for Md5RedisDb {
         // let value: String = cmd.query_async(&mut *conn).await?;
         // Ok(vec![value])
     }
-    async fn sync(&self) -> Result<(), CrabbooruError> {
+    async fn sync(&self) -> Result<()> {
         todo!()
     }
-    async fn remove(&self, _record: Self::Record) -> Result<(), CrabbooruError> {
+    async fn remove(&self, _record: Self::Record) -> Result<()> {
         todo!()
     }
-    async fn count(&self) -> Result<u64, CrabbooruError> {
+    async fn count(&self) -> Result<u64> {
         todo!()
     }
-    async fn paths(&self) -> Result<Vec<String>, CrabbooruError> {
+    async fn paths(&self) -> Result<Vec<String>> {
+        todo!()
+    }
+}
+
+impl Drop for Md5RedisDb {
+    fn drop(&mut self) {
+        todo!()
+    }
+}
+
+impl Md5RedisDb {
+    // pub fn new(_config: Config) -> Self {
+    //     todo!()
+    //     // let pool =
+    //     // Self { config, pool }
+    // }
+    async fn get_query(&self, _key: &str) -> Result<Vec<Md5RedisRecord>> {
+        todo!()
+    }
+    async fn add_query(&self, _key: &str, _value: &str) -> Result<()> {
+        todo!()
+    }
+    async fn remove_query(&self, _key: &str) -> Result<()> {
+        todo!()
+    }
+    async fn count_query(&self, _key: &str) -> Result<u64> {
+        todo!()
+    }
+    async fn remove_all_query(&self) -> Result<()> {
         todo!()
     }
 }
@@ -75,10 +149,6 @@ struct Config {
     pub port: u16,
     pub password: String,
     pub db: u8,
-    pub pool_size: u16,
-    pub timeout: u16,
-    pub max_reconnects: u8,
-    pub reconnect_interval: u16,
 }
 
 impl Default for Config {
@@ -88,10 +158,6 @@ impl Default for Config {
             port: 6379,
             password: "passwrd".to_string(),
             db: 0,
-            pool_size: 10,
-            timeout: 10,
-            max_reconnects: 3,
-            reconnect_interval: 5,
         }
     }
 }
