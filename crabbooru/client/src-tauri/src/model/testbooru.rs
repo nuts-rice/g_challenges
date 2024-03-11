@@ -1,4 +1,5 @@
 use serde::{Deserialize, Serialize};
+use crate::{model::img_factory::*};
 #[derive(Serialize, Deserialize, Debug, Clone)]
 pub struct TestbooruPost {
     pub id: i32,
@@ -76,3 +77,76 @@ impl std::fmt::Display for TestbooruPost {
         write!(f, "TestbooruPost: id={}", self.id)
     }
 }
+
+impl Image for TestbooruPost {}
+    // fn get_id(&self) -> i32 {
+    //     self.id
+    // }
+    // fn get_url(&self) -> String {
+    //     self.file_url.clone().unwrap_or("".to_string())
+    // }
+    // fn get_preview_url(&self) -> String {
+    //     self.preview_file_url.clone().unwrap_or("".to_string())
+    // }
+    // fn get_tags(&self) -> String {
+    //     self.tag_string.clone()
+    // }
+    // fn get_rating(&self) -> String {
+    //     self.rating.clone().unwrap_or(TestbooruRating::General).to_string()
+    // }
+    // fn get_source(&self) -> String {
+    //     self.source.clone()
+    // }
+    // fn get_width(&self) -> u32 {
+    //     self.image_width
+    // }
+    // fn get_height(&self) -> u32 {
+    //     self.image_height
+    // }
+    // fn get_score(&self) -> i32 {
+    //     self.score
+    // }
+    // fn get_up_score(&self) -> i32 {
+    //     self.up_score
+    // }
+    // fn get_down_score(&self) -> i32 {
+    //     self.down_score
+    // }
+    // fn get_fav_count(&self) -> u32 {
+    //     self.fav_count
+    // }
+    // fn get_tag_count(&self) -> u32 {
+    //     self.tag_count_general
+    // }
+    // fn get_created_at(&self) -> String {
+    //     self.created_at.clone()
+    // }
+    // fn get_updated_at(&self) -> String {
+    //     self.updated_at.clone()
+    // }
+    // fn get_file_size(&self) -> u32 {
+    //     self.file_size
+    // }
+    // fn get_file_ext(&self) -> String {
+    //     self.file_ext.clone()
+    // }
+    // fn get_parent_id(&self) -> Option<u32> {
+    //     self.parent_id
+    // }
+    // fn get_pixiv_id(&self) -> Option<u32> {
+    //     self.pixiv_id
+    // }
+    // fn get_md5(&self) -> Option<String> {
+    //     self.md5.clone()
+    // }
+    // fn get_large_file_url(&self) -> Option<String> {
+    //     self.large_file_url.clone()
+    // }
+    // fn get_last_comment_bumped_at(&self) -> Option<String> {
+    //     self.last_comment_bumped_at.clone()
+    // }
+    // fn get_last_noted_at(&self) -> Option<String> {
+    //     self.last_noted_at.clone()
+    // }
+    // fn get_bit_flags(&self) -> u32 {
+       

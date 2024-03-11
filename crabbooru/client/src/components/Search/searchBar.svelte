@@ -88,7 +88,7 @@
 
 async function handleAutoComplete() {
     let tag_suggestions = await invoke <string[]>("auto_tags_cmd", {input: value});
-    console.log("autocomplete");
+    console.log("autocomplete: ", tag_suggestions);
   }
 
   function getBooruSelection() {

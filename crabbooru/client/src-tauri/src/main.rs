@@ -7,7 +7,7 @@ use serde::{Deserialize, Serialize};
 use std::sync::Arc;
 use tauri::{CustomMenuItem, Manager, Menu, MenuItem, Submenu};
 use tracing::info;
-
+use tracing_test::traced_test;
 pub mod api;
 pub mod error;
 pub mod model;
@@ -33,6 +33,7 @@ pub enum BooruSite {
     Testbooru,
     // Custom,
 }
+
 pub static PreviewImgUrls: Lazy<Arc<AtomicRefCell<String>>> =
     Lazy::new(|| Arc::new(AtomicRefCell::new(String::new())));
 
@@ -153,7 +154,7 @@ async fn auto_tags_cmd(input: &str) -> Result<Vec<String>, CrabbooruError> {
     //     }
     //     canidates.push(char);
     // }
-
+    info!("suggestion: {:?}", suggestion);
     Ok(suggestion)
 }
 
@@ -264,7 +265,7 @@ fn main() {
         .add_submenu(tools_submenu)
         .add_submenu(view_submenu);
     tauri::Builder::default()
-        .manage(PreviewImgUrls.clone())
+        // .manage(PreviewImgUrls.clone())
         // .manage(TestbooruClient{inner: Default::default()})
         // .manage(DanbooruClient{inner: Default::default()})
         .invoke_handler(tauri::generate_handler![
@@ -283,18 +284,18 @@ fn main() {
             // get_images_cmd
         ])
         .setup(|app| {
-            let _preview_img_urls: Vec<String> = Vec::new();
-            let window = tauri::WindowBuilder::new(
+            // let _preview_img_urls: Vec<String> = Vec::new();
+            let mut builder = tauri::WindowBuilder::new(
                 app,
                 "main",
-                tauri::WindowUrl::App("./index.html".into()),
+                tauri::WindowUrl::App("../index.html".into()),
             )
             .menu(menu)
             .initialization_script(&format!("img urls: {}", &*PreviewImgUrls.borrow()))
             .build()?;
             let app_handle = app.handle();
             let _boxed_app_handle = Box::new(app_handle);
-            let _window = window.clone();
+            let _window = builder.clone();
 
             // window.on_menu_event(move |event| {
             //     "quit" => {

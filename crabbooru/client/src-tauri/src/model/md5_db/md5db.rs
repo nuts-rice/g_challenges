@@ -1,14 +1,16 @@
 // see: https://github.com/Bionus/imgbrd-grabber/blob/master/src/lib/src/models/md5-database
 use crate::CrabbooruError;
 use async_trait::async_trait;
-use r2d2::PooledConnection;
-
-use std::{collections::HashMap, time::Duration};
-
-use r2d2_redis::{r2d2, RedisConnectionManager};
-use r2d2_redis::redis::{Commands};
-
+use atomic_refcell::AtomicRefCell;
+use fred::{prelude::*, types::Builder};
+use std::{collections::HashMap, time::Duration, ops::{Deref, DerefMut}};
+use serde::{Deserialize, Serialize};
+use serde_json::{json, Value};
+use redis::{Client, AsyncCommands, ErrorKind, RedisError, RedisResult};
+use redis_macros::{FromRedisValue, ToRedisArgs};
+use tracing_test::traced_test;
 type Result<T> = std::result::Result<T, CrabbooruError>;
+
 #[async_trait]
 pub trait Md5Db {
     type Record;
@@ -19,8 +21,8 @@ pub trait Md5Db {
     const POOL_MAX_OPEN: &'static u32;
     async fn action(&self, record: Self::Record) -> Result<HashMap<String, String>>;
     async fn add(&self, record: Self::Record) -> Result<()>;
-    async fn connect(&self) -> Result<r2d2::Pool<RedisConnectionManager>>;
-    async fn get_conn(&self) -> Result<PooledConnection<RedisConnectionManager>>;
+    async fn connect(&self) -> Result<RedisClient>;
+    async fn get_conn(&self) -> Result<RedisClient>;
     async fn exists(&self, record: Self::Record) -> Result<Vec<String>>;
     async fn sync(&self) -> Result<()>;
     async fn remove(&self, record: Self::Record) -> Result<()>;
@@ -29,13 +31,13 @@ pub trait Md5Db {
 }
 
 struct Md5RedisDb {
-    pub config: Config,
-    pub pool: r2d2::Pool<redis::Client>,
+    pub config: RedisConfig,
 }
 
+#[derive(Clone, Debug, Eq, PartialEq, Serialize, Deserialize, )]
 struct Md5RedisRecord {
-    pub channel: String,
     pub md5: String,
+    pub path: String,
 }
 
 #[async_trait]
@@ -57,18 +59,25 @@ impl Md5Db for Md5RedisDb {
         // Ok(HashMap::new())
     }
 
-    async fn get_conn(&self) -> Result<PooledConnection<RedisConnectionManager>> {
-        let pool = self.connect().await?;
-        pool.get_timeout(Duration::from_secs(*Self::TIMEOUT));
-        let result = pool.get().unwrap();
-        Ok(result)            
+    async fn get_conn(&self) -> Result<RedisClient> {
+        let client = Builder::from_config(self.config.clone()).build().unwrap();
+        client.init().await.expect("Error initializing client");
+        Ok(client)            
     }
     //TODO: type error with .set
     async fn add(&self, _record: Self::Record) -> Result<()> {
-        let mut conn = self.get_conn().await?;
+        let conn = self.get_conn().await?;
+        if _record.md5.is_empty() {
+            return Ok(());
+        }
+        let record = json!(_record);
+
+        // let _: () = conn.set("md5", record.to_string(), None, None, false).await.expect("Error setting md5")?;
+        // conn.set("md5", record.to_string(), None, None, false).await.expect("Error setting md5")?;
+        // let _: () = redis::cmd("SET").arg(_record.channel).arg(_record.md5).query_async(conn.deref_mut()).unwrap();
             //.set(_record.channel, _record.md5);
         
-        // let _: () = redis::cmd("SET").arg(_record.channel).arg(_record.md5);
+        // let _: () = redisuse redis_macros::{FromRedisValue, ToRedisArgs};::cmd("SET").arg(_record.channel).arg(_record.md5);
                                                            
         Ok(())
         // let mut conn = self.pool.get().await?;
@@ -79,17 +88,18 @@ impl Md5Db for Md5RedisDb {
         // let _: () = cmd.query_async(&mut *conn).await?;
         // Ok(())
     }
-    async fn connect(&self) -> Result<r2d2::Pool<RedisConnectionManager>> {
-        let manager =
-            RedisConnectionManager::new(self.config.host.as_str()).expect("Redis client error");
-        let pool = r2d2::Pool::builder()
-            .max_size(*Self::POOL_MAX_OPEN)
-            // .max_lifetime(Some((*Self::TIMEOUT as i64)))
-            .build(manager)
+    async fn connect(&self) -> Result<RedisClient> {
+        unimplemented!()
+        // let manager =
+        //     RedisConnectionManager::new(self.config.host.as_str()).expect("Redis client error");
+        // let pool = r2d2::Pool::builder()
+        //     .max_size(*Self::POOL_MAX_OPEN)
+        //     // .max_lifetime(Some((*Self::TIMEOUT as i64)))
+        //     .build(manager)
             // .map_err(|e| r2d2::Error::from(Some(e.to_string())))
-            .unwrap();
+            // .unwrap();
 
-        Ok(pool)
+        // Ok(pool)
     }
     async fn exists(&self, _record: Self::Record) -> Result<Vec<String>> {
         todo!()
@@ -143,27 +153,27 @@ impl Md5RedisDb {
     }
 }
 
-#[derive(Debug, Clone)]
-struct Config {
-    pub host: String,
-    pub port: u16,
-    pub password: String,
-    pub db: u8,
-}
+// #[derive(Debug, Clone)]
+// struct Config {
+//     pub host: String,
+//     pub port: u16,
+//     pub password: String,
+//     pub db: u8,
+// }
 
-impl Default for Config {
-    fn default() -> Self {
-        Self {
-            host: "localhost:6379".to_string(),
-            port: 6379,
-            password: "passwrd".to_string(),
-            db: 0,
-        }
-    }
-}
+// impl Default for Config {
+//     fn default() -> Self {
+//         Self {
+//             host: "localhost:6379".to_string(),
+//             port: 6379,
+//             password: "passwrd".to_string(),
+//             db: 0,
+//         }
+//     }
+// }
 
 impl Md5RedisDb {
-    pub fn new(_config: Config) -> Self {
+    pub fn new(_config: RedisConfig) -> Self {
         todo!()
         // let pool =
         // Self { config, pool }
@@ -177,7 +187,7 @@ mod tests {
     #[tokio::test]
     #[traced_test]
     async fn test_md5_redis_db() {
-        let config = Config::default();
+        let config = RedisConfig::default();
         let md5_redis_db = Md5RedisDb::new(config);
     }
 }

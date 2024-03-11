@@ -1,5 +1,5 @@
 use crate::error::CrabbooruError;
-use crate::model::{DanbooruPost, SafebooruPost, TestbooruPost};
+use crate::model::{DanbooruPost, SafebooruPost, TestbooruPost, img_factory::{*}};
 use crate::SafebooruRating;
 use async_trait::async_trait;
 use reqwest::{
@@ -19,6 +19,8 @@ const DANBOORU_URL: &str = "https://danbooru.donmai.us";
 pub const USR_USER_AGENT: &str = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/58.0.3029.110 Safari/537.3";
 
 type Result<T> = std::result::Result<T, CrabbooruError>;
+
+
 #[derive(Debug, Deserialize, Serialize, Clone)]
 pub struct PageUrl {
     pub error: String,
@@ -43,9 +45,12 @@ pub trait ApiClient {
     const URL: &'static str;
     const SORT: &'static str;
     fn new() -> Self;
+    async fn gallery_url(&self, gallery: Vec<Img>, page: u32, site: &String) -> Result<PageUrl>;
     async fn booru_call(&self, tags: Vec<String>, limit: u32, page: u32)
         -> Result<Vec<Self::Post>>;
     async fn booru_call_id(&self, id: u32) -> Result<Self::Post>;
+    async fn parse_page(&self, source: &String, parent_page: PageUrl, status_code: u32, first: u32 ) -> ParsedPage;
+
     async fn parse_post(&self, post: Self::Post) -> Result<String>;
     async fn parse_posts(&self, response: Vec<Self::Post>) -> Result<Vec<String>>;
     async fn view_img(&self, img: Self::Post) -> Result<()>;
@@ -636,6 +641,13 @@ impl ApiClient for SafebooruClient {
             .unwrap();
         Ok(response)
     }
+    async fn gallery_url(&self, gallery: Vec<Img>, page: u32, site: &String) -> Result<PageUrl> {
+        unimplemented!();
+    }
+
+    async fn parse_page(&self, source: &String, parent_page: PageUrl, status_code: u32, first: u32) -> ParsedPage {
+        unimplemented!()
+    }
     async fn parse_post(&self, post: Self::Post) -> Result<String> {
         let img_url = post.file_url;
         Ok(img_url.unwrap())
@@ -726,6 +738,14 @@ impl ApiClient for TestBooruClient {
             .unwrap();
         Ok(response)
     }
+    async fn gallery_url(&self, gallery: Vec<Img>, page: u32, site: &String) -> Result<PageUrl> {
+        unimplemented!();
+    }
+
+    async fn parse_page(&self, source: &String, parent_page: PageUrl, status_code: u32, first: u32) -> ParsedPage {
+        unimplemented!()
+    }
+
     async fn parse_post(&self, post: Self::Post) -> Result<String> {
         let img_url = post.file_url.unwrap();
         Ok(img_url)
