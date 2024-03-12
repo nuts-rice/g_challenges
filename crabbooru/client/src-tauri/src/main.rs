@@ -283,29 +283,31 @@ fn main() {
             // get_source,
             // get_images_cmd
         ])
-        .setup(|app| {
-            // let _preview_img_urls: Vec<String> = Vec::new();
-            let mut builder = tauri::WindowBuilder::new(
-                app,
-                "main",
-                tauri::WindowUrl::App("../index.html".into()),
-            )
-            .menu(menu)
-            .initialization_script(&format!("img urls: {}", &*PreviewImgUrls.borrow()))
-            .build()?;
-            let app_handle = app.handle();
-            let _boxed_app_handle = Box::new(app_handle);
-            let _window = builder.clone();
+        // .setup(|app| {
+        //     let width = 800.;
+        //     let height = 600.;
+        //     // let _preview_img_urls: Vec<String> = Vec::new();
+        //     let mut builder = tauri::WindowBuilder::new(
+        //         app,
+        //         "main",
+        //         tauri::WindowUrl::App("../index.html".into()),
+        //     )
+        //     .menu(menu)
+        //     .initialization_script(&format!("img urls: {}", &*PreviewImgUrls.borrow()))
+        //     .inner_size(width, height)             
+        //     .build()?;
+        //     let app_handle = app.handle();
+        //     let _boxed_app_handle = Box::new(app_handle);
+            
+        //     // window.on_menu_event(move |event| {
+        //     //     "quit" => {
+        //     //         std::process::exit(0);
+        //     //     }
+        //     //     _ => {}
+        //     // });
 
-            // window.on_menu_event(move |event| {
-            //     "quit" => {
-            //         std::process::exit(0);
-            //     }
-            //     _ => {}
-            // });
-
-            Ok(())
-        })
+        //     Ok(())
+        // })
         .run(tauri::generate_context!())
         .expect("error while running tauri application");
 }
