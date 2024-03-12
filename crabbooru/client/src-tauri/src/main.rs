@@ -5,15 +5,17 @@ use reqwest::header::USER_AGENT;
 
 use serde::{Deserialize, Serialize};
 use std::sync::Arc;
-use tauri::{CustomMenuItem, Manager, Menu, MenuItem, Submenu};
+use tauri::{CustomMenuItem, Menu, MenuItem, Submenu};
 use tracing::info;
-use tracing_test::traced_test;
+
 pub mod api;
+pub mod commands;
 pub mod error;
 pub mod model;
 pub mod utils;
 pub mod viewer;
 pub use api::*;
+pub use commands::*;
 pub use error::*;
 pub use model::*;
 pub use utils::*;
@@ -48,21 +50,6 @@ pub static PreviewImgUrls: Lazy<Arc<AtomicRefCell<String>>> =
 //         let (c, id) = c.recv();
 //     }
 // }
-
-#[tauri::command]
-async fn get_source(_api_state: TestbooruAccess<'_>) -> Result<String, CrabbooruError> {
-    // let api = api_state.inner();
-    // let source = api::DanbooruClient::URL;
-    // Ok(PageUrl { error: String::from("Url error"), url: String::from(source), headers: HashMap::new() })
-    todo!()
-}
-
-#[tauri::command]
-fn fetch_profile(profile: String) {
-    println!("profile: {}", profile);
-    todo!()
-}
-
 #[tauri::command]
 async fn simple_download(url: String) -> Result<(), CrabbooruError> {
     //TODO: let user_agent be set by the user
@@ -141,7 +128,7 @@ async fn get_images_cmd(
 }
 #[tauri::command]
 async fn auto_tags_cmd(input: &str) -> Result<Vec<String>, CrabbooruError> {
-    let tags_data = autocomplete_tag_helper("../tags/danbooru.csv");
+    let tags_data = crate::autocomplete_tag_helper("../tags/danbooru.csv");
     let tags_names: Vec<String> = tags_data.unwrap().into_iter().map(|tag| tag.name).collect();
     let suggestion = tags_names
         .iter()
@@ -154,7 +141,7 @@ async fn auto_tags_cmd(input: &str) -> Result<Vec<String>, CrabbooruError> {
     //     }
     //     canidates.push(char);
     // }
-    info!("suggestion: {:?}", suggestion);
+    tracing::info!("suggestion: {:?}", suggestion);
     Ok(suggestion)
 }
 
@@ -169,14 +156,9 @@ async fn get_md5_db_cmd(_api_state: TestbooruAccess<'_>) -> Result<(), Crabbooru
 }
 #[tauri::command]
 async fn connect_api_cmd(api_state: TestbooruAccess<'_>) -> Result<(), CrabbooruError> {
-    info!("connect_api_cmd");
+    tracing::info!("connect_api_cmd");
     let _api = api_state.inner();
     Ok(())
-}
-
-#[tauri::command]
-fn main_window() {
-    todo!()
 }
 
 #[tauri::command]
@@ -257,7 +239,7 @@ fn main() {
     );
     let tags_view = CustomMenuItem::new("view_tags".to_string(), "Tags");
     let view_submenu = Submenu::new("View", Menu::new().add_item(tags_view));
-    let menu = Menu::new()
+    let _menu = Menu::new()
         .add_native_item(MenuItem::Copy)
         .add_item(CustomMenuItem::new("hide", "Hide"))
         .add_submenu(file_submenu)
@@ -294,18 +276,16 @@ fn main() {
         //     )
         //     .menu(menu)
         //     .initialization_script(&format!("img urls: {}", &*PreviewImgUrls.borrow()))
-        //     .inner_size(width, height)             
+        //     .inner_size(width, height)
         //     .build()?;
         //     let app_handle = app.handle();
         //     let _boxed_app_handle = Box::new(app_handle);
-            
         //     // window.on_menu_event(move |event| {
         //     //     "quit" => {
         //     //         std::process::exit(0);
         //     //     }
         //     //     _ => {}
         //     // });
-
         //     Ok(())
         // })
         .run(tauri::generate_context!())
