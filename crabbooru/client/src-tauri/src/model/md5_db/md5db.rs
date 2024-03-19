@@ -1,14 +1,16 @@
 // see: https://github.com/Bionus/imgbrd-grabber/blob/master/src/lib/src/models/md5-database
 use crate::CrabbooruError;
 use async_trait::async_trait;
-use atomic_refcell::AtomicRefCell;
+
 use fred::{prelude::*, types::Builder};
-use std::{collections::HashMap, time::Duration, ops::{Deref, DerefMut}};
+
+
 use serde::{Deserialize, Serialize};
-use serde_json::{json, Value};
-use redis::{Client, AsyncCommands, ErrorKind, RedisError, RedisResult};
-use redis_macros::{FromRedisValue, ToRedisArgs};
-use tracing_test::traced_test;
+use serde_json::{json};
+use std::{
+    collections::HashMap,
+};
+
 type Result<T> = std::result::Result<T, CrabbooruError>;
 
 #[async_trait]
@@ -34,7 +36,7 @@ struct Md5RedisDb {
     pub config: RedisConfig,
 }
 
-#[derive(Clone, Debug, Eq, PartialEq, Serialize, Deserialize, )]
+#[derive(Clone, Debug, Eq, PartialEq, Serialize, Deserialize)]
 struct Md5RedisRecord {
     pub md5: String,
     pub path: String,
@@ -62,23 +64,23 @@ impl Md5Db for Md5RedisDb {
     async fn get_conn(&self) -> Result<RedisClient> {
         let client = Builder::from_config(self.config.clone()).build().unwrap();
         client.init().await.expect("Error initializing client");
-        Ok(client)            
+        Ok(client)
     }
     //TODO: type error with .set
     async fn add(&self, _record: Self::Record) -> Result<()> {
-        let conn = self.get_conn().await?;
+        let _conn = self.get_conn().await?;
         if _record.md5.is_empty() {
             return Ok(());
         }
-        let record = json!(_record);
+        let _record = json!(_record);
 
         // let _: () = conn.set("md5", record.to_string(), None, None, false).await.expect("Error setting md5")?;
         // conn.set("md5", record.to_string(), None, None, false).await.expect("Error setting md5")?;
         // let _: () = redis::cmd("SET").arg(_record.channel).arg(_record.md5).query_async(conn.deref_mut()).unwrap();
-            //.set(_record.channel, _record.md5);
-        
+        //.set(_record.channel, _record.md5);
+
         // let _: () = redisuse redis_macros::{FromRedisValue, ToRedisArgs};::cmd("SET").arg(_record.channel).arg(_record.md5);
-                                                           
+
         Ok(())
         // let mut conn = self.pool.get().await?;
         // let mut cmd = redis::cmd("HSET");
@@ -96,8 +98,8 @@ impl Md5Db for Md5RedisDb {
         //     .max_size(*Self::POOL_MAX_OPEN)
         //     // .max_lifetime(Some((*Self::TIMEOUT as i64)))
         //     .build(manager)
-            // .map_err(|e| r2d2::Error::from(Some(e.to_string())))
-            // .unwrap();
+        // .map_err(|e| r2d2::Error::from(Some(e.to_string())))
+        // .unwrap();
 
         // Ok(pool)
     }

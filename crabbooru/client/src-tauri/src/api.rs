@@ -1,15 +1,18 @@
 use crate::error::CrabbooruError;
-use crate::model::{DanbooruPost, SafebooruPost, TestbooruPost, img_factory::{*}};
+use crate::model::{img_factory::*, DanbooruPost, SafebooruPost, TestbooruPost};
 use crate::SafebooruRating;
 use async_trait::async_trait;
+use axum::response::IntoResponse;
 use reqwest::{
     header,
     header::{HeaderMap, USER_AGENT},
 };
+use rocket::catcher::BoxFuture;
 use serde::{Deserialize, Serialize};
+use serde_json::json;
 
-use std::{any::Any, collections::HashMap};
-
+use std::{any::Any, collections::HashMap, net::SocketAddr};
+use tracing_test::traced_test;
 use tauri::State;
 
 use tracing::info;
@@ -19,7 +22,6 @@ const DANBOORU_URL: &str = "https://danbooru.donmai.us";
 pub const USR_USER_AGENT: &str = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/58.0.3029.110 Safari/537.3";
 
 type Result<T> = std::result::Result<T, CrabbooruError>;
-
 
 #[derive(Debug, Deserialize, Serialize, Clone)]
 pub struct PageUrl {
@@ -45,11 +47,18 @@ pub trait ApiClient {
     const URL: &'static str;
     const SORT: &'static str;
     fn new() -> Self;
+    fn http_api_test(&self, addr: SocketAddr) -> BoxFuture<'static, Result<()>>;
     async fn gallery_url(&self, gallery: Vec<Img>, page: u32, site: &String) -> Result<PageUrl>;
     async fn booru_call(&self, tags: Vec<String>, limit: u32, page: u32)
         -> Result<Vec<Self::Post>>;
     async fn booru_call_id(&self, id: u32) -> Result<Self::Post>;
-    async fn parse_page(&self, source: &String, parent_page: PageUrl, status_code: u32, first: u32 ) -> ParsedPage;
+    async fn parse_page(
+        &self,
+        source: &String,
+        parent_page: PageUrl,
+        status_code: u32,
+        first: u32,
+    ) -> ParsedPage;
 
     async fn parse_post(&self, post: Self::Post) -> Result<String>;
     async fn parse_posts(&self, response: Vec<Self::Post>) -> Result<Vec<String>>;
@@ -641,11 +650,36 @@ impl ApiClient for SafebooruClient {
             .unwrap();
         Ok(response)
     }
-    async fn gallery_url(&self, gallery: Vec<Img>, page: u32, site: &String) -> Result<PageUrl> {
+
+    fn http_api_test(&self, addr: SocketAddr) -> BoxFuture<'static, Result<()>> {
+        let state = self.clone();
+        async fn root() -> impl IntoResponse {
+            axum::Json(json!({"apis":{
+                "GET /": "lists all available apis",
+                "GET /posts/{id}": "get post by id",
+                "GET /posts": "get all posts",
+                "GET /posts?tags=tag1+tag2": "get posts by tags",
+                "GET /posts?tags=tag1+tag2&page=1&limit=100": "get posts by tags with pagination",
+                "GET /tags": "get all tags",
+                "POST /posts/{id}/favorite": "favorite post",
+                "POST /posts/{id}/unfavorite": "unfavorite post",
+                "POST /posts/{id}/vote": "vote on post",
+                "POST /posts/{id}/tags": "post tags on post",
+        }}))
+        }
+        unimplemented!()
+    }
+    async fn gallery_url(&self, _gallery: Vec<Img>, _page: u32, _site: &String) -> Result<PageUrl> {
         unimplemented!();
     }
 
-    async fn parse_page(&self, source: &String, parent_page: PageUrl, status_code: u32, first: u32) -> ParsedPage {
+    async fn parse_page(
+        &self,
+        _source: &String,
+        _parent_page: PageUrl,
+        _status_code: u32,
+        _first: u32,
+    ) -> ParsedPage {
         unimplemented!()
     }
     async fn parse_post(&self, post: Self::Post) -> Result<String> {
@@ -738,11 +772,36 @@ impl ApiClient for TestBooruClient {
             .unwrap();
         Ok(response)
     }
-    async fn gallery_url(&self, gallery: Vec<Img>, page: u32, site: &String) -> Result<PageUrl> {
+        fn http_api_test(&self, addr: SocketAddr) -> BoxFuture<'static, Result<()>> {
+        let state = self.clone();
+        async fn root() -> impl IntoResponse {
+            axum::Json(json!({"apis":{
+                "GET /": "lists all available apis",
+                "GET /posts/{id}": "get post by id",
+                "GET /posts": "get all posts",
+                "GET /posts?tags=tag1+tag2": "get posts by tags",
+                "GET /posts?tags=tag1+tag2&page=1&limit=100": "get posts by tags with pagination",
+                "GET /tags": "get all tags",
+                "POST /posts/{id}/favorite": "favorite post",
+                "POST /posts/{id}/unfavorite": "unfavorite post",
+                "POST /posts/{id}/vote": "vote on post",
+                "POST /posts/{id}/tags": "post tags on post",
+        }}))
+        }
+        unimplemented!()
+    }
+
+    async fn gallery_url(&self, _gallery: Vec<Img>, _page: u32, _site: &String) -> Result<PageUrl> {
         unimplemented!();
     }
 
-    async fn parse_page(&self, source: &String, parent_page: PageUrl, status_code: u32, first: u32) -> ParsedPage {
+    async fn parse_page(
+        &self,
+        _source: &String,
+        _parent_page: PageUrl,
+        _status_code: u32,
+        _first: u32,
+    ) -> ParsedPage {
         unimplemented!()
     }
 
@@ -784,6 +843,7 @@ impl ApiClient for TestBooruClient {
         todo!()
     }
 }
+ 
 
 //simple image view util because all this ts is too complicated
 pub async fn view_img_test() {

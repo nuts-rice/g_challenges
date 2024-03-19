@@ -1,5 +1,5 @@
 use async_trait::async_trait;
-use image::RgbImage;
+
 use serde::{Deserialize, Serialize};
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
@@ -12,7 +12,4 @@ pub struct Img {
 #[async_trait]
 pub trait Image {}
 
-
-
-pub struct ImgFactory {
-}
+pub struct ImgFactory {}

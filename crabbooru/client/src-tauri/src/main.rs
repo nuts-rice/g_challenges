@@ -1,5 +1,6 @@
 #![cfg_attr(not(debug_assertions), windows_subsystem = "windows")]
 use atomic_refcell::AtomicRefCell;
+use image::{DynamicImage, EncodableLayout};
 use once_cell::sync::Lazy;
 use reqwest::header::USER_AGENT;
 
@@ -7,7 +8,7 @@ use serde::{Deserialize, Serialize};
 use std::sync::Arc;
 use tauri::{CustomMenuItem, Menu, MenuItem, Submenu};
 use tracing::info;
-
+use tracing_test::traced_test;
 pub mod api;
 pub mod commands;
 pub mod error;
@@ -172,6 +173,28 @@ async fn booru_call_test(
         let client = TestBooruClient::new();
         let call = client.booru_call(tags, page, limit).await.unwrap();
         info!("test call: {:?}", call);
+        for post in call {
+            info!("post img file url: {:?}", post.file_url);
+            let img_data = reqwest::get(reqwest::Url::parse(&post.file_url.unwrap()).unwrap())
+                .await
+                .unwrap()
+                .bytes()
+                .await
+                .unwrap();
+            let reader  = image::io::Reader::new(std::io::Cursor::new(img_data)).with_guessed_format().unwrap();
+            let img  = reader.decode().expect("failed to decode img");
+            img.save("test_img_lol.jpg").unwrap();
+            //TODO: match and parse file ext , this is jpeg
+            // let mut options = DecoderOptions::default().jpeg_set_out_colorspace(ColorSpace::RGB);
+            // let mut decoder = JpegDecoder::new_with_options(&img_data, &options);
+            // // let pixels = decoder.decode().unwrap();
+            // let image = ImageView::new(ImageInfo::rgb8(post.image_width, post.image_height), img_data.as_bytes());
+            // info!("img info {:?}", image.info());
+            // let window = show_image::create_window("test img", Default::default()).unwrap();
+            // window.set_image("test img 0", img).unwrap();
+                    
+        }
+            
     } else if boorus.contains(&String::from("Safebooru")) {
         let client = SafebooruClient::new();
         let call = client.booru_call(tags, page, limit).await.unwrap();

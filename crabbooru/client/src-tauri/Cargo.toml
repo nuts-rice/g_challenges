@@ -37,6 +37,12 @@ r2d2_redis = "0.14.0"
 rocket = "0.5.0"
 redis-macros = "0.2.1"
 fred = "8.0.4"
+axum = "0.7.4"
+show-image = "0.13.1"
+jpeg-decoder = "0.3.1"
+zune-jpeg = "0.4.11"
+zune-core = "0.4.12"
+png = "0.17.13"
 [package.metadata.packager]
 before-packaging-command = "cargo build --release"
 
