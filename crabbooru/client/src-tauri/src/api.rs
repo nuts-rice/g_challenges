@@ -12,8 +12,8 @@ use serde::{Deserialize, Serialize};
 use serde_json::json;
 
 use std::{any::Any, collections::HashMap, net::SocketAddr};
-use tracing_test::traced_test;
 use tauri::State;
+
 
 use tracing::info;
 
@@ -651,21 +651,21 @@ impl ApiClient for SafebooruClient {
         Ok(response)
     }
 
-    fn http_api_test(&self, addr: SocketAddr) -> BoxFuture<'static, Result<()>> {
-        let state = self.clone();
+    fn http_api_test(&self, _addr: SocketAddr) -> BoxFuture<'static, Result<()>> {
+        let _state = self;
         async fn root() -> impl IntoResponse {
             axum::Json(json!({"apis":{
-                "GET /": "lists all available apis",
-                "GET /posts/{id}": "get post by id",
-                "GET /posts": "get all posts",
-                "GET /posts?tags=tag1+tag2": "get posts by tags",
-                "GET /posts?tags=tag1+tag2&page=1&limit=100": "get posts by tags with pagination",
-                "GET /tags": "get all tags",
-                "POST /posts/{id}/favorite": "favorite post",
-                "POST /posts/{id}/unfavorite": "unfavorite post",
-                "POST /posts/{id}/vote": "vote on post",
-                "POST /posts/{id}/tags": "post tags on post",
-        }}))
+                    "GET /": "lists all available apis",
+                    "GET /posts/{id}": "get post by id",
+                    "GET /posts": "get all posts",
+                    "GET /posts?tags=tag1+tag2": "get posts by tags",
+                    "GET /posts?tags=tag1+tag2&page=1&limit=100": "get posts by tags with pagination",
+                    "GET /tags": "get all tags",
+                    "POST /posts/{id}/favorite": "favorite post",
+                    "POST /posts/{id}/unfavorite": "unfavorite post",
+                    "POST /posts/{id}/vote": "vote on post",
+                    "POST /posts/{id}/tags": "post tags on post",
+            }}))
         }
         unimplemented!()
     }
@@ -772,21 +772,21 @@ impl ApiClient for TestBooruClient {
             .unwrap();
         Ok(response)
     }
-        fn http_api_test(&self, addr: SocketAddr) -> BoxFuture<'static, Result<()>> {
-        let state = self.clone();
+    fn http_api_test(&self, _addr: SocketAddr) -> BoxFuture<'static, Result<()>> {
+        let _state = self;
         async fn root() -> impl IntoResponse {
             axum::Json(json!({"apis":{
-                "GET /": "lists all available apis",
-                "GET /posts/{id}": "get post by id",
-                "GET /posts": "get all posts",
-                "GET /posts?tags=tag1+tag2": "get posts by tags",
-                "GET /posts?tags=tag1+tag2&page=1&limit=100": "get posts by tags with pagination",
-                "GET /tags": "get all tags",
-                "POST /posts/{id}/favorite": "favorite post",
-                "POST /posts/{id}/unfavorite": "unfavorite post",
-                "POST /posts/{id}/vote": "vote on post",
-                "POST /posts/{id}/tags": "post tags on post",
-        }}))
+                    "GET /": "lists all available apis",
+                    "GET /posts/{id}": "get post by id",
+                    "GET /posts": "get all posts",
+                    "GET /posts?tags=tag1+tag2": "get posts by tags",
+                    "GET /posts?tags=tag1+tag2&page=1&limit=100": "get posts by tags with pagination",
+                    "GET /tags": "get all tags",
+                    "POST /posts/{id}/favorite": "favorite post",
+                    "POST /posts/{id}/unfavorite": "unfavorite post",
+                    "POST /posts/{id}/vote": "vote on post",
+                    "POST /posts/{id}/tags": "post tags on post",
+            }}))
         }
         unimplemented!()
     }
@@ -843,7 +843,6 @@ impl ApiClient for TestBooruClient {
         todo!()
     }
 }
- 
 
 //simple image view util because all this ts is too complicated
 pub async fn view_img_test() {

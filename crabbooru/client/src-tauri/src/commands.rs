@@ -1,15 +1,5 @@
-
-
-
-
-
-
-
-
 use crate::api::*;
 use crate::error::*;
-
-
 
 #[tauri::command]
 pub fn get_source(_api_state: TestbooruAccess<'_>) -> Result<String, CrabbooruError> {

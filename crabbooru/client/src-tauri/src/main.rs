@@ -1,14 +1,15 @@
 #![cfg_attr(not(debug_assertions), windows_subsystem = "windows")]
-use atomic_refcell::AtomicRefCell;
-use image::{DynamicImage, EncodableLayout};
-use once_cell::sync::Lazy;
+
+
+
 use reqwest::header::USER_AGENT;
 
 use serde::{Deserialize, Serialize};
-use std::sync::Arc;
+
 use tauri::{CustomMenuItem, Menu, MenuItem, Submenu};
+use tokio::sync::mpsc::{Receiver, Sender};
 use tracing::info;
-use tracing_test::traced_test;
+
 pub mod api;
 pub mod commands;
 pub mod error;
@@ -37,8 +38,10 @@ pub enum BooruSite {
     // Custom,
 }
 
-pub static PreviewImgUrls: Lazy<Arc<AtomicRefCell<String>>> =
-    Lazy::new(|| Arc::new(AtomicRefCell::new(String::new())));
+pub type BooruRequest = (Vec<String>, u32, u32);
+
+pub type RequestSender = Sender<BooruRequest>;
+pub type PostReciever = Receiver<Post>;
 
 // use session_types::*;
 // extern crate model;
@@ -181,8 +184,10 @@ async fn booru_call_test(
                 .bytes()
                 .await
                 .unwrap();
-            let reader  = image::io::Reader::new(std::io::Cursor::new(img_data)).with_guessed_format().unwrap();
-            let img  = reader.decode().expect("failed to decode img");
+            let reader = image::io::Reader::new(std::io::Cursor::new(img_data))
+                .with_guessed_format()
+                .unwrap();
+            let img = reader.decode().expect("failed to decode img");
             img.save("test_img_lol.jpg").unwrap();
             //TODO: match and parse file ext , this is jpeg
             // let mut options = DecoderOptions::default().jpeg_set_out_colorspace(ColorSpace::RGB);
@@ -192,9 +197,7 @@ async fn booru_call_test(
             // info!("img info {:?}", image.info());
             // let window = show_image::create_window("test img", Default::default()).unwrap();
             // window.set_image("test img 0", img).unwrap();
-                    
         }
-            
     } else if boorus.contains(&String::from("Safebooru")) {
         let client = SafebooruClient::new();
         let call = client.booru_call(tags, page, limit).await.unwrap();

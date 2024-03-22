@@ -4,12 +4,9 @@ use async_trait::async_trait;
 
 use fred::{prelude::*, types::Builder};
 
-
 use serde::{Deserialize, Serialize};
-use serde_json::{json};
-use std::{
-    collections::HashMap,
-};
+use serde_json::json;
+use std::collections::HashMap;
 
 type Result<T> = std::result::Result<T, CrabbooruError>;
 
